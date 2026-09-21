@@ -204,3 +204,47 @@ de inserção inválida (e-mail duplicado, `dia_semana = 9`, tipo de material in
 `fator_facilidade` abaixo de 1.3, nota 9, FK órfã, revisão duplicada) foram todas
 recusadas pelo banco, e o `CASCADE` zerou as sete tabelas a partir de um único `DELETE`
 na raiz.
+
+---
+
+## [2026-09-21] Formato e momento dos diagramas
+
+**Contexto:** a trilha do charter (§10, Sprint 6) prevê "diagramas UML" como entrega.
+Ao pedir um diagrama do banco, ficou evidente que "UML" estava sendo usado como termo
+guarda-chuva para *qualquer* diagrama — mas DER e diagrama de classes UML são coisas
+diferentes, e essa distinção é conteúdo de defesa.
+
+**Distinção adotada:**
+
+- **DER** (Entidade-Relacionamento) representa **tabelas**. É o modelo do banco.
+- **Diagrama de classes UML** representa **classes Java**. É o modelo do código.
+
+Os dois não coincidem de propósito: `MaterialEstudo` é *uma* classe abstrata no UML e
+*quatro* tabelas no DER. Essa não-coincidência é o descasamento objeto-tabela que o
+Sprint 2 vai tratar — é o motivo de o ORM existir.
+
+**Escolha de momento:** DER agora; UML de classes no Sprint 1.
+
+**Motivo:** o esquema do banco já existe e está testado, então o DER descreve algo
+real. As classes Java ainda não existem — um UML feito agora seria desenho de intenção,
+e teria que ser refeito assim que o código divergisse. Diagrama gerado a partir de
+código existente não mente.
+
+**Escolha de formato:** Mermaid, versionado como texto, renderizado para SVG e PNG.
+
+**Alternativas:** ferramenta gráfica (draw.io, brModelo) exportando imagem · Mermaid ·
+PlantUML.
+
+**Motivo:** o Mermaid é texto, então o Git mostra exatamente o que mudou quando uma
+coluna é alterada — uma imagem binária só mostra "arquivo modificado". O GitHub também
+renderiza Mermaid nativamente dentro do Markdown, sem instalar nada. SVG e PNG ficam
+versionados junto para impressão e para colar em slides.
+
+**O que se perde:** o layout é decidido pelo Mermaid, não por mim. Não dá para arrastar
+uma tabela para melhorar a estética, e as linhas de relacionamento podem se cruzar mais
+do que se o desenho fosse manual. Para a entrega final, se a estética pesar, dá para
+redesenhar em ferramenta gráfica usando este DER como referência.
+
+**Validação:** a sintaxe foi renderizada de verdade antes de commitar — e o teste pegou
+um erro real (`PK_FK` não existe em Mermaid; a forma correta de marcar chave dupla é
+`PK, FK`). Sem renderizar, o diagrama teria ido para o repositório quebrado.

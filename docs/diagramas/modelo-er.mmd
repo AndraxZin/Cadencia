@@ -1,0 +1,89 @@
+erDiagram
+    usuario ||--o{ disciplina    : "cadastra"
+    usuario ||--o{ sessao_estudo : "realiza"
+
+    disciplina      ||--o{ aula            : "tem"
+    aula            ||--o{ material_estudo : "gera"
+
+    material_estudo ||--o| flashcard : "é um"
+    material_estudo ||--o| resumo    : "é um"
+    material_estudo ||--o| questao   : "é um"
+
+    material_estudo ||--o| revisao : "é agendado por"
+
+    sessao_estudo ||--o{ sessao_revisao : "percorre"
+    revisao       ||--o{ sessao_revisao : "é respondida em"
+
+    usuario {
+        bigint      id          PK "IDENTITY"
+        varchar     nome
+        varchar     email       UK "único"
+        varchar     senha_hash     "hash BCrypt (RNF01)"
+        timestamptz criado_em
+    }
+
+    disciplina {
+        bigint   id          PK
+        bigint   usuario_id  FK "CASCADE"
+        varchar  nome
+        varchar  professor      "opcional"
+        smallint dia_semana     "CHECK 1..7"
+    }
+
+    aula {
+        bigint  id            PK
+        bigint  disciplina_id FK "CASCADE"
+        date    data
+        varchar titulo
+        integer duracao_min      "opcional, CHECK maior que zero"
+    }
+
+    material_estudo {
+        bigint      id        PK "TABELA PAI"
+        bigint      aula_id   FK "CASCADE"
+        varchar     tipo         "discriminador, CHECK"
+        varchar     titulo
+        timestamptz criado_em
+    }
+
+    flashcard {
+        bigint material_id PK, FK "SUBTIPO"
+        text   frente
+        text   verso
+    }
+
+    resumo {
+        bigint material_id PK, FK "SUBTIPO"
+        text   corpo_md          "Markdown"
+    }
+
+    questao {
+        bigint  material_id PK, FK "SUBTIPO"
+        text    enunciado
+        text    gabarito
+        varchar nivel            "CHECK FACIL MEDIO DIFICIL"
+    }
+
+    revisao {
+        bigint  id               PK
+        bigint  material_id      FK "UNIQUE: 1 por material"
+        date    data_prevista       "alimenta o calendário (RF02)"
+        integer intervalo_dias
+        numeric fator_facilidade    "CHECK maior ou igual 1.30"
+        integer repeticoes
+        smallint ultima_nota        "0..5, NULL se nunca revisado"
+    }
+
+    sessao_estudo {
+        bigint      id            PK
+        bigint      usuario_id    FK "CASCADE"
+        timestamptz iniciada_em
+        timestamptz finalizada_em    "NULL enquanto aberta"
+    }
+
+    sessao_revisao {
+        bigint      sessao_id     PK, FK "chave composta"
+        bigint      revisao_id    PK, FK "chave composta"
+        smallint    nota                "0..5, atributo próprio"
+        timestamptz respondida_em       "atributo próprio"
+    }
