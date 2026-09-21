@@ -9,6 +9,10 @@
 
 **Cadência** é uma plataforma de estudo ativo por repetição espaçada.
 
+> **Requisitos, modelo de domínio e modelo relacional:** `docs/CHARTER.md`.
+> Esse arquivo é a fonte de verdade do *o quê*; este aqui define o *como*.
+> Quando os dois divergirem, o charter vence — e este arquivo se atualiza.
+
 É um **Projeto Integrador de Sistemas Computacionais** do 4º semestre de Análise e
 Desenvolvimento de Sistemas (Unieuro, 2026.2, Prof. Henrique Dominges Garcia).
 
@@ -100,6 +104,7 @@ saber que preciso voltar nele antes da apresentação.
 |---|---|
 | Linguagem | Java 21 (Temurin) |
 | Framework | Spring Boot 3.x |
+| Segurança | Spring Security (hash de senha — RNF01) |
 | Build | Maven, via wrapper `mvnw` |
 | Banco | PostgreSQL 16 |
 | Migrations | Flyway |
@@ -141,12 +146,21 @@ de persistência. Aceitamos esse custo de propósito.
 
 ## Escopo
 
-**Dentro (v1):** cadastro e autenticação · CRUD de disciplinas e aulas · criação manual
-de flashcards, questões e resumos · motor de repetição espaçada SM-2 · sessão de estudo
-com fila priorizada · painel de desempenho.
+A lista canônica de requisitos está em `docs/CHARTER.md` §5. Resumo do que entra:
 
-**Fora (v1):** geração de material por IA · transcrição de áudio · app mobile ·
-compartilhamento entre usuários.
+**Dentro (v1 — Fase 1, OE1 a OE5):** cadastro e autenticação segura (RF03, RF04) ·
+CRUD de disciplinas e aulas (RF05, RF06) · **visão de calendário semanal e mensal**
+(RF07) · **calendário de revisões agendadas** (RF02) · criação manual de flashcards,
+questões e resumos (RF08) · cards que retomam de onde parou (RF09) · motor SM-2
+(RF01) · sessão diária com fila priorizada (RF10) · painel de progresso por
+disciplina (RF11) · sequência de dias estudados (RF12).
+
+**Fase 2 (depois da v1 entregue — OE6):** tokens de acesso para agentes de IA,
+escopados por disciplina ou aula, com revogação individual (RF13, RF14). Não é corte:
+é dependência — um token só escopa o que já existe.
+
+**Fora do projeto:** transcrição de áudio ou inferência de IA hospedada pelo próprio
+Cadência · app mobile nativo · compartilhamento de baralhos entre usuários.
 
 Se eu pedir algo fora do escopo, me lembre que está fora e pergunte se quero
 reabrir a decisão.
