@@ -300,3 +300,71 @@ Separar as duas camadas elimina o atrito sem sacrificar a marca.
 **Ação tomada:** o `README.md` foi reescrito com o acento correto e passou a explicar a
 origem do nome logo no topo, antes de qualquer detalhe técnico — a metáfora é argumento
 de defesa, não enfeite.
+
+---
+
+## [2026-09-21] Dois ambientes de banco: PostgreSQL local + Neon
+
+**Contexto:** surgiu a opção de hospedar o banco no Neon (PostgreSQL gerenciado, com
+plano gratuito sem prazo), em lugar de rodar apenas um PostgreSQL local. O projeto é
+desenvolvido em duas máquinas diferentes, o que torna um banco remoto atraente: o mesmo
+dado acessível dos dois lados, sem sincronizar nada à mão.
+
+**Termo:** *Postgres serverless* não significa ausência de servidor. Significa que o
+servidor não é administrado por quem usa: ele é ligado quando chega uma conexão e
+desligado quando para de chegar. A consequência é o *scale to zero* — após alguns
+minutos ocioso, o servidor hiberna, e a primeira consulta seguinte leva alguns segundos
+para responder enquanto ele acorda.
+
+**Alternativas:**
+
+- **Só local** — zero dependência de rede, controle total, e a defesa nunca depende do
+  Wi-Fi da sala. Mas não exercita deploy, e os dados não acompanham entre as duas
+  máquinas.
+- **Só Neon** — um único banco, mesmo dado em qualquer lugar, e aprendizado real de
+  banco gerenciado. Mas sem internet não há banco, e a apresentação passa a depender da
+  rede da sala mais o cold start do scale to zero.
+- **Os dois, com perfis do Spring** — local para desenvolver e apresentar, Neon como
+  ambiente remoto.
+
+**Escolha:** os dois.
+
+**Motivo:** o custo de manter ambos é baixo justamente porque o Flyway existe — a mesma
+migration `V1` roda nos dois sem qualquer alteração, e a diferença fica restrita à
+string de conexão, isolada em perfis do Spring. Em troca, a apresentação final roda
+local e não depende de rede nem de cold start, enquanto o Neon demonstra o
+conhecimento de deploy.
+
+**O que se perde:** duas configurações de conexão para manter em duas máquinas, e o
+risco de os dois bancos divergirem em conteúdo se alguém aplicar algo em um só. Mitigado
+pela regra das migrations: toda mudança de esquema vira um arquivo versionado, aplicado
+nos dois.
+
+### Decisão associada: o fluxo `neon deploy` não se aplica a este projeto
+
+A documentação do Neon sugere `neon config init`, um arquivo `neon.ts` e `neon deploy`.
+Esse caminho é voltado a aplicações **Node/TypeScript** — o `neon deploy` procura uma
+aplicação JavaScript para publicar, e `neon.ts` é um arquivo TypeScript.
+
+Este projeto é Maven + Spring Boot. Seguir aquele fluxo criaria um arquivo TypeScript
+órfão dentro de um projeto Java, sem aplicação para o comando publicar.
+
+**Escolha:** usar o Neon apenas como endpoint PostgreSQL — string de conexão no Spring,
+Flyway aplicando as migrations. O CLI do Neon fica como conveniência opcional para
+consultar o banco pelo terminal, não como parte do processo de build ou deploy.
+
+### Decisão associada: `.gitignore` criado antes da primeira credencial
+
+O repositório não tinha `.gitignore`. Como a string de conexão do Neon contém a senha do
+banco, a proteção foi criada **antes** de a credencial existir, e não depois — segredo
+enviado ao GitHub deve ser tratado como vazado mesmo que o commit seja removido, porque
+o histórico do Git preserva e varredura automatizada de repositórios públicos é
+rotineira.
+
+O arquivo bloqueia `.env`, `application-local.properties`, chaves e certificados, além
+da saída de build do Maven e da configuração de IDE — esta última porque o projeto é
+desenvolvido em duas máquinas com perfis distintos, e versionar configuração de IDE
+produziria conflito a cada `pull`.
+
+**Validação:** o `.gitignore` foi testado criando `.env`, `application-local.properties`
+e `target/` e confirmando que o Git os ignora.

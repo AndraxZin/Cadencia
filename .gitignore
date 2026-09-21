@@ -1,0 +1,106 @@
+# =============================================================================
+# Cadência — arquivos que NÃO vão para o repositório
+#
+# Três grupos: segredos, saída de build e configuração de máquina.
+# O primeiro é o que importa de verdade — os outros são higiene.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# SEGREDOS — nunca commitar
+#
+# A string de conexão do Neon (e de qualquer banco remoto) contém a SENHA.
+# Uma vez enviada ao GitHub, considere-a vazada mesmo que o commit seja
+# removido depois: o histórico do Git guarda, e robôs varrem repositórios
+# públicos atrás exatamente disso, em minutos.
+#
+# A regra prática: senha nunca vive em arquivo versionado. Vive em variável
+# de ambiente, ou em arquivo local que o Git ignora — como os daqui.
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.local.properties
+application-local.properties
+application-local.yml
+application-secret*.properties
+src/main/resources/application-local.*
+src/test/resources/application-local.*
+
+# Chaves e certificados
+*.pem
+*.key
+*.p12
+*.jks
+!**/src/test/resources/**/*.p12
+
+# Credenciais de ferramentas de nuvem
+.neon/
+.vercel/
+.railway/
+
+# -----------------------------------------------------------------------------
+# BUILD — gerado pelo Maven, recriado a cada compilação
+# -----------------------------------------------------------------------------
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+!**/.mvn/wrapper/*.jar
+
+# Logs
+*.log
+logs/
+
+# -----------------------------------------------------------------------------
+# IDE — configuração da máquina, não do projeto
+#
+# Como o projeto é desenvolvido em dois computadores com perfis de usuário
+# diferentes, versionar configuração de IDE produziria conflito a cada pull.
+# -----------------------------------------------------------------------------
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse / STS
+.classpath
+.project
+.settings/
+.apt_generated/
+.factorypath
+.springBeans
+.sts4-cache/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
+
+# -----------------------------------------------------------------------------
+# SISTEMA OPERACIONAL
+# -----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -----------------------------------------------------------------------------
+# FRONT-END (Sprint 5 — Tailwind CSS)
+#
+# node_modules tem milhares de arquivos e é reconstruído por "npm install"
+# a partir do package.json, que ESSE sim vai versionado.
+# -----------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+
+# CSS gerado pelo Tailwind a partir do arquivo-fonte
+src/main/resources/static/css/output.css
