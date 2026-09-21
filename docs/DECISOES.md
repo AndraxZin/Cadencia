@@ -248,3 +248,55 @@ redesenhar em ferramenta gráfica usando este DER como referência.
 **Validação:** a sintaxe foi renderizada de verdade antes de commitar — e o teste pegou
 um erro real (`PK_FK` não existe em Mermaid; a forma correta de marcar chave dupla é
 `PK, FK`). Sem renderizar, o diagrama teria ido para o repositório quebrado.
+
+---
+
+## [2026-09-21] Manutenção do nome "Cadência" e a convenção de acento
+
+**Contexto:** ao configurar o deploy do banco, surgiu a dúvida de trocar o nome do
+projeto. O incômodo relatado foi que "no GitHub ficou estranho" e que a ligação entre o
+nome e o produto não estava clara.
+
+**Investigação:** o problema não era o nome. O `README.md` tinha como título
+`# Cad-ncia` — um hífen literal no lugar do `ê`, não uma falha de codificação (o resto
+do arquivo trazia "repetição" e "espaçada" corretos em UTF-8). Como o GitHub renderiza
+o README em destaque no topo da página, o nome do projeto aparecia quebrado para
+qualquer visitante.
+
+**Alternativas consideradas:** manter "Cadência" · trocar por "Compasso" (sem acento,
+metáfora equivalente, e o instrumento de desenho oferece símbolo gráfico pronto) ·
+trocar por "Sinapse" (ângulo neurocientífico) · trocar por "Andamento".
+
+**Escolha:** manter **Cadência**.
+
+**Motivo:** a metáfora sustenta a tese do produto melhor que qualquer alternativa. Em
+música, cadência é a sequência que resolve uma frase; no uso comum, é ritmo constante.
+O sistema não promete memorizar mais — promete calcular **quando voltar**. Essa é
+exatamente a ideia da repetição espaçada, e o nome a entrega numa frase. Além disso,
+o charter da AC já circula com esse nome, e trocar introduziria divergência entre o
+documento entregue ao professor e o repositório.
+
+**O que se perde:** "Cadence" colide com software conhecido — a Cadence Design Systems
+e o workflow engine Cadence (Uber/Temporal). Para um projeto acadêmico isso é
+irrelevante, mas se um dia virar portfólio público, a busca pelo nome não será limpa.
+
+### Convenção de acento, decidida junto
+
+**Marca com acento, identificador técnico sem.**
+
+| Contexto | Forma |
+|---|---|
+| Nome do produto, títulos, documentação | Cadência |
+| Repositório no GitHub | `Cadencia` |
+| Banco de dados | `cadencia` |
+| Pacote Java | `br.edu.unieuro.cadencia` |
+
+**Motivo:** um repositório chamado `Cadência` produziria a URL
+`github.com/AndraxZin/Cad%C3%AAncia` — o navegador percent-encoda o `ê` e o link fica
+ilegível ao ser copiado. O mesmo vale para nome de banco e pacote Java, onde caractere
+acentuado é fonte de problema entre sistemas operacionais e codificações diferentes.
+Separar as duas camadas elimina o atrito sem sacrificar a marca.
+
+**Ação tomada:** o `README.md` foi reescrito com o acento correto e passou a explicar a
+origem do nome logo no topo, antes de qualquer detalhe técnico — a metáfora é argumento
+de defesa, não enfeite.
