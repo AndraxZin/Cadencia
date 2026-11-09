@@ -1,0 +1,8 @@
+# Arquivos gerados pela compilação
+bin/
+out/
+*.class
+
+# Configurações de IDE
+.idea/
+*.iml
