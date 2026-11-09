@@ -52,7 +52,7 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 
 **Alternativas:** construir cada classe com explicação e confirmação, uma por vez; ou gerar uma base completa e estudá-la depois.
 
-**Escolha:** o Claude gerou de uma vez a estrutura model/service/view/Main, o script `sql/schema.sql` e estes documentos. Os dados ficam em memória, sem JDBC por enquanto.
+**Escolha:** o Claude gerou de uma vez a estrutura model/service/view/Main, o script `sql/schema.sql` e estes documentos. Os dados ficam em memória, sem JDBC por enquanto. O `CLAUDE.md`, que ainda descrevia Spring Boot e web, foi atualizado para o escopo de terminal + JDBC.
 
 **Motivo:** havia pouco tempo. O que se perde: o combinado de explicar antes de escrever, uma unidade por vez. Para compensar, Caio estuda a base arquivo por arquivo, e as próximas funcionalidades (DAO/JDBC, revisão, histórico, testes) serão feitas passo a passo.
 

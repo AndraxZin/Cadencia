@@ -7,7 +7,8 @@
 
 ## Contexto
 
-**Cadência** é uma plataforma de estudo ativo por repetição espaçada.
+**Cadência** é um aplicativo de terminal em Java para estudo ativo por repetição
+espaçada, com flashcards e banco de dados PostgreSQL.
 
 É um **Projeto Integrador de Sistemas Computacionais** do 4º semestre de Análise e
 Desenvolvimento de Sistemas (Unieuro, 2026.2, Prof. Henrique Dominges Garcia).
@@ -17,7 +18,7 @@ modelagem relacional. Não é a quantidade de funcionalidades. Um sistema pequen
 domínio bem modelado vale mais que um sistema grande e confuso.
 
 **Quem sou eu:** estudante, 4º semestre. Sei programar em C e tenho experiência com
-Python/Django e Git. **Nunca usei Java nem Spring Boot.** Vou apresentar e defender
+Python/Django e Git. **Nunca usei Java.** Vou apresentar e defender
 este projeto sozinho, respondendo perguntas de um professor.
 
 ---
@@ -38,14 +39,14 @@ acabamos de fazer. Se minha explicação estiver incompleta ou errada, corrija e
 de novo de outro ângulo antes de avançar. Não aceite "entendi" como resposta suficiente.
 
 ### 4. Nada de termo não definido
-Ao usar um termo técnico pela primeira vez (`bean`, `injeção de dependência`, `ORM`,
-`lazy loading`, `migration`...), pare e defina em uma ou duas frases. Não presuma
+Ao usar um termo técnico pela primeira vez (`JDBC`, `DAO`, `enum`, `Optional`,
+`PreparedStatement`...), pare e defina em uma ou duas frases. Não presuma
 vocabulário.
 
 ### 5. Decisões são minhas
 Quando existir mais de um caminho razoável, apresente as opções com o custo de cada
 uma e **me deixe escolher**. Pode recomendar uma, mas não decida sozinho. Exemplos:
-estratégia de mapeamento de herança, onde colocar uma regra de negócio, usar ou não
+onde colocar uma regra de negócio, como modelar uma tabela, usar ou não
 uma biblioteca.
 
 ### 6. Eu escrevo parte do código
@@ -87,9 +88,8 @@ saber que preciso voltar nele antes da apresentação.
 ## Idioma
 
 - Conversa comigo: **português**
-- Classes e atributos do domínio: **português** (`Flashcard`, `Revisao`, `fatorFacilidade`)
-- Termos de framework e convenções técnicas: mantêm o original (`Repository`,
-  `Controller`, `Service`)
+- Classes e atributos do domínio: **português** (`Flashcard`, `Revisao`, `proximaRevisao`)
+- Termos técnicos e convenções: mantêm o original (`Service`, `DAO`, `JDBC`)
 - Comentários e documentação: **português**
 
 ---
@@ -99,13 +99,12 @@ saber que preciso voltar nele antes da apresentação.
 | Camada | Tecnologia |
 |---|---|
 | Linguagem | Java 21 (Temurin) |
-| Framework | Spring Boot 3.x |
-| Build | Maven, via wrapper `mvnw` |
+| Interface | Terminal: menus de texto lidos com `Scanner` |
+| Build | `javac` direto, sem Maven e sem framework |
 | Banco | PostgreSQL 16 |
-| Migrations | Flyway |
+| Acesso ao banco | JDBC (driver do PostgreSQL), numa camada `dao` |
+| Script das tabelas | `sql/schema.sql`, executado com `psql` |
 | Testes | JUnit 5 |
-| Templates | Thymeleaf |
-| Estilo | Tailwind CSS |
 | IDE | IntelliJ IDEA Community |
 
 **Ambiente:** Windows 11, PowerShell.
@@ -119,33 +118,32 @@ caminhos absolutos — verifique antes de usar.
 ## Arquitetura
 
 ```
-br.edu.unieuro.cadencia
-  ├── dominio       ← POO pura. Sem Spring, sem JPA, sem anotação de framework.
-  ├── repositorio   ← interfaces de persistência
-  ├── servico       ← regras de negócio e orquestração
-  ├── web           ← controllers
-  └── config
+br.com.cadencia
+  ├── Main.java     ← ponto de entrada: monta as peças e inicia o menu
+  ├── model         ← classes de dados (Disciplina, Flashcard). Java puro.
+  ├── service       ← regras de negócio. Não conhece a tela nem o banco.
+  ├── dao           ← acesso ao PostgreSQL via JDBC (próxima etapa)
+  └── view          ← menus e leitura do teclado
 ```
 
-**Regra inegociável:** o pacote `dominio` não importa nada de framework. É Java puro.
+**Regra inegociável:** a regra de negócio fica no `service`. A `view` só conversa com
+o usuário e o `dao` só conversa com o banco; nenhum dos dois decide regra.
 
-Motivo pedagógico: é nesse pacote que a disciplina será avaliada. Se as classes
-estiverem cobertas de anotações do Spring e do JPA, o conceito de POO fica escondido
-atrás de infraestrutura. Separando, eu consigo abrir uma classe na apresentação e
-mostrar herança e polimorfismo sem ruído.
-
-Consequência assumida: haverá alguma duplicação entre entidades de domínio e entidades
-de persistência. Aceitamos esse custo de propósito.
+Motivo pedagógico: a disciplina avalia POO e modelagem relacional. Com cada
+responsabilidade em um lugar só, eu consigo abrir uma classe na apresentação e
+explicá-la sem ruído.
 
 ---
 
 ## Escopo
 
-**Dentro (v1):** cadastro e autenticação · CRUD de disciplinas e aulas · criação manual
-de flashcards, questões e resumos · motor de repetição espaçada SM-2 · sessão de estudo
-com fila priorizada · painel de desempenho.
+**Dentro (esta entrega):** cadastro de disciplinas e flashcards · listagem e busca ·
+revisão do dia com intervalos fixos de 1, 3, 7 e 15 dias · histórico de revisões ·
+remoção com confirmação · persistência em PostgreSQL via JDBC · testes com JUnit.
+Detalhes em `docs/DOCUMENTACAO.md`.
 
-**Fora (v1):** geração de material por IA · transcrição de áudio · app mobile ·
+**Fora:** interface web · login e autenticação · algoritmo SM-2 · calendário ·
+agentes de IA · geração de material por IA · transcrição de áudio · app mobile ·
 compartilhamento entre usuários.
 
 Se eu pedir algo fora do escopo, me lembre que está fora e pergunte se quero
@@ -155,7 +153,7 @@ reabrir a decisão.
 
 ## O que não fazer
 
-- Não adicione dependência ao `pom.xml` sem me perguntar antes
+- Não adicione biblioteca externa (driver JDBC, JUnit ou outra) sem me perguntar antes
 - Não gere código "de bônus" que eu não pedi
 - Não use padrão de projeto avançado sem justificar a necessidade real
 - Não otimize antes de existir um problema medido
