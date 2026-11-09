@@ -172,10 +172,22 @@ public class MenuConsole {
     }
 
     private void mostrarDisciplinas(List<Disciplina> lista) {
-        System.out.printf("%-6s %-30s %s%n", "Cód.", "Disciplina", "Professor");
+        // A coluna "Disciplina" tem a largura do maior nome da lista
+        // (no mínimo, a do próprio título), para a coluna "Professor" ficar alinhada.
+        int largura = "Disciplina".length();
+        for (Disciplina d : lista) {
+            largura = Math.max(largura, d.getNome().length());
+        }
+
+        // Ex.: com largura 31, o formato fica "%-6s %-31s %s%n".
+        // O "-" alinha o texto à esquerda e o número reserva essa quantidade de espaços.
+        String formatoCabecalho = "%-6s %-" + largura + "s %s%n";
+        String formatoLinha = "%-6d %-" + largura + "s %s%n";
+
+        System.out.printf(formatoCabecalho, "Cód.", "Disciplina", "Professor");
         for (Disciplina d : lista) {
             String professor = d.getProfessor().isEmpty() ? "-" : d.getProfessor();
-            System.out.printf("%-6d %-30s %s%n", d.getCodigo(), d.getNome(), professor);
+            System.out.printf(formatoLinha, d.getCodigo(), d.getNome(), professor);
         }
     }
 
