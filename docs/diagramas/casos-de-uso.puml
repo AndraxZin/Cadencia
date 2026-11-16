@@ -1,0 +1,31 @@
+@startuml
+!pragma layout smetana
+skinparam monochrome true
+skinparam usecaseBackgroundColor white
+skinparam actorBackgroundColor white
+skinparam rectangleBackgroundColor white
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Liberation Sans"
+skinparam defaultFontSize 15
+left to right direction
+actor "Estudante" as E
+actor "Sistema\n(data do computador)" as R
+rectangle "Cadência" {
+  usecase "CU01 - Cadastrar disciplina" as CU01
+  usecase "CU02 - Cadastrar flashcard" as CU02
+  usecase "CU03 - Listar disciplinas\ne flashcards" as CU03
+  usecase "CU04 - Revisar flashcards\ndo dia" as CU04
+  usecase "CU05 - Consultar histórico" as CU05
+  usecase "CU06 - Remover disciplina" as CU06
+  usecase "CU07 - Remover flashcard" as CU07
+}
+E --> CU01
+E --> CU02
+E --> CU03
+E --> CU04
+E --> CU05
+E --> CU06
+E --> CU07
+CU04 <-- R
+@enduml

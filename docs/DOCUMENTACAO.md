@@ -5,6 +5,7 @@ Projeto Integrador de Sistemas Computacionais · Unieuro · ADS, 4º semestre ·
 Integrantes: Caio Andrax Portela Carvalho e Guilherme Pinheiro
 
 > O que já está implementado em cada requisito aparece na tabela de situação do [README](../README.md).
+> A especificação completa (casos de uso, regras de negócio e telas) está no [Documento de Requisitos](REQUISITOS.md).
 
 ---
 
@@ -48,7 +49,7 @@ Desenvolver a primeira versão funcional de um sistema de linha de comando em Ja
 |---|---|---|
 | RF-01 | Cadastro de disciplinas | Permite cadastrar disciplinas com nome (obrigatório e único) e professor (opcional). |
 | RF-02 | Cadastro de flashcards | Permite cadastrar flashcards vinculados a uma disciplina, com frente e verso obrigatórios. O card novo começa na etapa 0, com a primeira revisão no dia seguinte. |
-| RF-03 | Listagem e busca | Lista as disciplinas e os flashcards de uma disciplina, com mensagem clara quando não houver registros. |
+| RF-03 | Listagem | Lista as disciplinas e os flashcards de uma disciplina, com mensagem clara quando não houver registros. |
 | RF-04 | Revisão do dia | Apresenta os flashcards com revisão prevista para hoje ou antes: mostra a frente, revela o verso quando o aluno pedir e pergunta se acertou. |
 | RF-05 | Agendamento por intervalos fixos | Etapa 0 = 1 dia, etapa 1 = 3 dias, etapa 2 = 7 dias, etapa 3 = 15 dias. Acerto avança uma etapa (a etapa 3 permanece); erro volta à etapa 0. |
 | RF-06 | Histórico de revisões | Registra cada resposta (data e se acertou) e permite consultar o histórico de um flashcard. |
@@ -63,6 +64,9 @@ Desenvolver a primeira versão funcional de um sistema de linha de comando em Ja
 | RNF-03 | Banco de dados | PostgreSQL via JDBC. DDL com PK, FK, UNIQUE, CHECK e CREATE INDEX. Modelo normalizado até a 3FN. |
 | RNF-04 | Robustez | Entradas inválidas não encerram o programa: o sistema mostra uma mensagem clara e pede de novo. |
 | RNF-05 | Execução local | O banco roda na máquina do usuário, sem internet nem APIs externas. |
+| RNF-06 | Disponibilidade sem banco | Se o PostgreSQL não estiver acessível, o sistema avisa e funciona com os dados em memória. |
+| RNF-07 | Segurança da configuração | A senha do banco é informada por variável de ambiente e nunca fica no código-fonte. |
+| RNF-08 | Usabilidade | Menus numerados, mensagens com [OK] e [ERRO], tabelas alinhadas e datas no formato dd/mm/aaaa. |
 
 ---
 

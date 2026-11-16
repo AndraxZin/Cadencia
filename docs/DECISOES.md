@@ -141,3 +141,17 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 **Motivo:** prazo. O que se perde: o Caio ainda não escreveu nem revisou este código. **Estudar antes da apresentação**, nesta ordem: `FlashcardService` (regra das etapas), `DisciplinaDaoJdbc` (padrão JDBC), `Main` (escolha banco ou memória), `MenuConsole.revisarHoje`.
 
 **Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Documento de Requisitos no formato da disciplina de Engenharia de Requisitos
+
+**Contexto:** o Caio pediu que os requisitos do Cadência seguissem a formatação do documento de requisitos usado na disciplina de Engenharia de Requisitos.
+
+**Alternativas:** manter só a seção 3 do `DOCUMENTACAO.md`; ou criar um documento próprio, no formato do modelo.
+
+**Escolha:** `docs/REQUISITOS.md` (fonte) e `docs/Cadencia-Documento-de-Requisitos.pdf`, com capa, visão do negócio, escopo positivo e negativo, atores, 7 casos de uso detalhados, diagrama UML de casos de uso (PlantUML), requisitos funcionais e não funcionais, regras de negócio, telas do terminal, especificação de telas e considerações finais. O `DOCUMENTACAO.md` continua no formato do guia do professor Henrique e aponta para o novo documento. Os identificadores seguem o padrão do projeto (RF-01, RN-01) para casar com o resto da documentação.
+
+**Motivo:** a especificação fica completa e serve de base para a matriz de rastreabilidade e para os testes. O que se perde: são dois documentos que precisam continuar coerentes. Junto com isso, o RF-03 passou a se chamar "Listagem" (não existe busca por texto) e entraram o RNF-06 (funciona em memória sem banco), o RNF-07 (senha em variável de ambiente) e o RNF-08 (usabilidade). O diagrama de casos de uso foi feito pelo Claude; se o Guilherme já tiver o dele, ele substitui este.
+
+**Quem decidiu:** Caio, dentro da exceção ao contrato de 16/11.
