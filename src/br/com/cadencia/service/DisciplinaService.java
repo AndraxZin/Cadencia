@@ -1,55 +1,69 @@
 package br.com.cadencia.service;
 
+import br.com.cadencia.dao.DisciplinaDao;
 import br.com.cadencia.model.Disciplina;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Regras de negócio das disciplinas (RF-01 e RF-03).
+ * Regras de negócio das disciplinas (RF-01, RF-03 e RF-07).
  *
- * Por enquanto os dados ficam numa lista em memória: somem quando o programa
- * fecha. Na próxima etapa esta lista será trocada pelo banco PostgreSQL (JDBC).
+ * Não sabe se os dados ficam no PostgreSQL ou em memória: só conversa com a
+ * interface DisciplinaDao, que o Main escolhe e entrega pronta.
  */
 public class DisciplinaService {
 
-    private final List<Disciplina> disciplinas = new ArrayList<>();
-    private int proximoCodigo = 1;
+    private static final int TAMANHO_MAXIMO = 100; // VARCHAR(100) na tabela
+
+    private final DisciplinaDao disciplinaDao;
+
+    public DisciplinaService(DisciplinaDao disciplinaDao) {
+        this.disciplinaDao = disciplinaDao;
+    }
 
     /**
-     * Cadastra uma disciplina. O nome é obrigatório e não pode repetir.
+     * Cadastra uma disciplina. O nome é obrigatório e não pode repetir
+     * (sem diferenciar maiúscula de minúscula: "banco de dados" = "Banco de Dados").
      *
-     * @throws IllegalArgumentException se o nome estiver vazio ou já existir
+     * @throws IllegalArgumentException se o nome estiver vazio, longo demais ou já existir
      */
     public Disciplina cadastrar(String nome, String professor) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("O nome da disciplina é obrigatório.");
         }
         String nomeLimpo = nome.trim();
+        String professorLimpo = (professor == null) ? "" : professor.trim();
 
-        boolean jaExiste = disciplinas.stream()
+        if (nomeLimpo.length() > TAMANHO_MAXIMO || professorLimpo.length() > TAMANHO_MAXIMO) {
+            throw new IllegalArgumentException("Nome e professor podem ter no máximo "
+                    + TAMANHO_MAXIMO + " caracteres.");
+        }
+
+        boolean jaExiste = disciplinaDao.listar().stream()
                 .anyMatch(d -> d.getNome().equalsIgnoreCase(nomeLimpo));
         if (jaExiste) {
             throw new IllegalArgumentException(
                     "Já existe uma disciplina chamada \"" + nomeLimpo + "\".");
         }
 
-        String professorLimpo = (professor == null) ? "" : professor.trim();
-        Disciplina nova = new Disciplina(proximoCodigo++, nomeLimpo, professorLimpo);
-        disciplinas.add(nova);
-        return nova;
+        return disciplinaDao.inserir(nomeLimpo, professorLimpo);
     }
 
-    /** Devolve uma cópia da lista: quem chamar não consegue alterar a lista original. */
     public List<Disciplina> listar() {
-        return List.copyOf(disciplinas);
+        return disciplinaDao.listar();
     }
 
     /** Procura pelo código. Optional = "pode ter achado ou não" (evita devolver null). */
     public Optional<Disciplina> buscarPorCodigo(int codigo) {
-        return disciplinas.stream()
-                .filter(d -> d.getCodigo() == codigo)
-                .findFirst();
+        return disciplinaDao.buscarPorCodigo(codigo);
+    }
+
+    /**
+     * RF-07: remove a disciplina; os flashcards dela e o histórico vão junto.
+     * A confirmação (S/N) é pedida pela tela antes de chamar este método.
+     */
+    public void remover(Disciplina disciplina) {
+        disciplinaDao.remover(disciplina.getCodigo());
     }
 }

@@ -6,8 +6,9 @@ import java.time.LocalDate;
  * Um cartão de estudo: a frente (pergunta) e o verso (resposta),
  * ligado a uma disciplina.
  *
- * Regra de revisão (RF-05): o cartão novo começa na etapa 0 e a primeira
- * revisão é no dia seguinte. Etapas: 0 = 1 dia, 1 = 3 dias, 2 = 7 dias, 3 = 15 dias.
+ * A etapa (0 a 3) e a data da próxima revisão mudam a cada resposta do aluno.
+ * QUEM calcula os novos valores é o FlashcardService (regra de negócio);
+ * esta classe só guarda os dados.
  */
 public class Flashcard {
 
@@ -16,18 +17,24 @@ public class Flashcard {
     private final String frente;
     private final String verso;
 
-    // Estes dois vão mudar quando o aluno revisar o cartão (RF-04/RF-05,
-    // ainda não feito). Por isso não são "final".
+    // Mudam a cada revisão, por isso não são "final".
     private int etapa;
     private LocalDate proximaRevisao;
 
-    public Flashcard(int codigo, Disciplina disciplina, String frente, String verso) {
+    public Flashcard(int codigo, Disciplina disciplina, String frente, String verso,
+                     int etapa, LocalDate proximaRevisao) {
         this.codigo = codigo;
         this.disciplina = disciplina;
         this.frente = frente;
         this.verso = verso;
-        this.etapa = 0;
-        this.proximaRevisao = LocalDate.now().plusDays(1);
+        this.etapa = etapa;
+        this.proximaRevisao = proximaRevisao;
+    }
+
+    /** Guarda a nova etapa e a nova data, já calculadas pelo FlashcardService. */
+    public void reagendar(int novaEtapa, LocalDate novaData) {
+        this.etapa = novaEtapa;
+        this.proximaRevisao = novaData;
     }
 
     public int getCodigo() {

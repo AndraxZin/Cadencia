@@ -1,12 +1,15 @@
 package br.com.cadencia.view;
 
+import br.com.cadencia.dao.AcessoDadosException;
 import br.com.cadencia.model.Disciplina;
 import br.com.cadencia.model.Flashcard;
+import br.com.cadencia.model.Revisao;
 import br.com.cadencia.service.DisciplinaService;
 import br.com.cadencia.service.FlashcardService;
 
 import java.io.Console;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,6 +25,7 @@ import java.util.Scanner;
 public class MenuConsole {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FORMATO_DATA_HORA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final DisciplinaService disciplinaService;
     private final FlashcardService flashcardService;
@@ -58,15 +62,24 @@ public class MenuConsole {
                     continue;
                 }
 
-                switch (opcao.get()) {
-                    case CADASTRAR_DISCIPLINA -> cadastrarDisciplina();
-                    case LISTAR_DISCIPLINAS -> listarDisciplinas();
-                    case CADASTRAR_FLASHCARD -> cadastrarFlashcard();
-                    case LISTAR_FLASHCARDS -> listarFlashcards();
-                    case SAIR -> {
-                        executando = false;
-                        System.out.println("Até a próxima revisão!");
+                try {
+                    switch (opcao.get()) {
+                        case CADASTRAR_DISCIPLINA -> cadastrarDisciplina();
+                        case LISTAR_DISCIPLINAS -> listarDisciplinas();
+                        case CADASTRAR_FLASHCARD -> cadastrarFlashcard();
+                        case LISTAR_FLASHCARDS -> listarFlashcards();
+                        case REVISAR_HOJE -> revisarHoje();
+                        case VER_HISTORICO -> verHistorico();
+                        case REMOVER_DISCIPLINA -> removerDisciplina();
+                        case REMOVER_FLASHCARD -> removerFlashcard();
+                        case SAIR -> {
+                            executando = false;
+                            System.out.println("Até a próxima revisão!");
+                        }
                     }
+                } catch (AcessoDadosException e) {
+                    // Problema no banco (ex.: o PostgreSQL caiu): avisa e volta ao menu (RNF-04).
+                    System.out.println("[ERRO] " + e.getMessage());
                 }
             }
         } catch (NoSuchElementException e) {
@@ -139,16 +152,110 @@ public class MenuConsole {
             return;
         }
 
-        List<Flashcard> lista = flashcardService.listarPorDisciplina(disciplina.get().getCodigo());
+        List<Flashcard> lista = flashcardService.listarPorDisciplina(disciplina.get());
         if (lista.isEmpty()) {
             System.out.println("Esta disciplina ainda não tem flashcards.");
             return;
         }
+        mostrarFlashcards(lista);
+    }
 
-        System.out.printf("%-6s %-6s %-14s %s%n", "Cód.", "Etapa", "Próx. revisão", "Frente");
-        for (Flashcard f : lista) {
-            System.out.printf("%-6d %-6d %-14s %s%n",
-                    f.getCodigo(), f.getEtapa(), f.getProximaRevisao().format(FORMATO_DATA), f.getFrente());
+    /** RF-04 e RF-05: mostra um cartão por vez e registra se o aluno acertou. */
+    private void revisarHoje() {
+        System.out.println();
+        System.out.println("--- Revisar hoje ---");
+        List<Flashcard> paraRevisar = flashcardService.listarParaRevisarHoje();
+        if (paraRevisar.isEmpty()) {
+            System.out.println("Nenhum flashcard para revisar hoje.");
+            return;
+        }
+
+        int total = paraRevisar.size();
+        System.out.println(total + " flashcard(s) para revisar hoje.");
+        int acertos = 0;
+        int posicao = 1;
+        for (Flashcard flashcard : paraRevisar) {
+            System.out.println();
+            System.out.println("[" + posicao + "/" + total + "] " + flashcard.getDisciplina().getNome());
+            System.out.println("Frente: " + flashcard.getFrente());
+            System.out.print("(Enter para ver a resposta)");
+            scanner.nextLine();
+            System.out.println("Verso:  " + flashcard.getVerso());
+
+            boolean acertou = lerSimNao("Você acertou? (S/N): ");
+            LocalDate proxima = flashcardService.registrarResposta(flashcard, acertou);
+            if (acertou) {
+                acertos++;
+            }
+            System.out.println("[OK] Etapa " + flashcard.getEtapa() + ". Próxima revisão em "
+                    + proxima.format(FORMATO_DATA) + ".");
+            posicao++;
+        }
+
+        System.out.println();
+        System.out.println("Revisão concluída: " + acertos + " acerto(s) e "
+                + (total - acertos) + " erro(s).");
+    }
+
+    /** RF-06: histórico de um flashcard, do mais recente para o mais antigo. */
+    private void verHistorico() {
+        System.out.println();
+        System.out.println("--- Histórico de um flashcard ---");
+        Optional<Flashcard> flashcard = escolherFlashcard();
+        if (flashcard.isEmpty()) {
+            return;
+        }
+
+        System.out.println("Frente: " + flashcard.get().getFrente());
+        List<Revisao> historico = flashcardService.listarHistorico(flashcard.get());
+        if (historico.isEmpty()) {
+            System.out.println("Este flashcard ainda não foi revisado.");
+            return;
+        }
+
+        System.out.printf("%-17s %s%n", "Data e hora", "Resultado");
+        for (Revisao revisao : historico) {
+            System.out.printf("%-17s %s%n",
+                    revisao.getRevisadoEm().format(FORMATO_DATA_HORA),
+                    revisao.isAcertou() ? "Acertou" : "Errou");
+        }
+    }
+
+    /** RF-07: remove a disciplina (e os flashcards dela) depois de confirmar. */
+    private void removerDisciplina() {
+        System.out.println();
+        System.out.println("--- Remover disciplina ---");
+        Optional<Disciplina> disciplina = escolherDisciplina();
+        if (disciplina.isEmpty()) {
+            return;
+        }
+
+        int quantidade = flashcardService.listarPorDisciplina(disciplina.get()).size();
+        System.out.println("Isso apaga a disciplina \"" + disciplina.get().getNome() + "\", "
+                + quantidade + " flashcard(s) e o histórico deles.");
+        if (lerSimNao("Tem certeza? (S/N): ")) {
+            disciplinaService.remover(disciplina.get());
+            System.out.println("[OK] Disciplina removida.");
+        } else {
+            System.out.println("Remoção cancelada.");
+        }
+    }
+
+    /** RF-07: remove um flashcard (e o histórico dele) depois de confirmar. */
+    private void removerFlashcard() {
+        System.out.println();
+        System.out.println("--- Remover flashcard ---");
+        Optional<Flashcard> flashcard = escolherFlashcard();
+        if (flashcard.isEmpty()) {
+            return;
+        }
+
+        System.out.println("Isso apaga o flashcard \"" + flashcard.get().getFrente() + "\" e o histórico dele.");
+        if (lerSimNao("Tem certeza? (S/N): ")) {
+            flashcardService.remover(flashcard.get());
+            System.out.println("[OK] Flashcard removido.");
+        } else {
+            System.out.println("Remoção cancelada.");
         }
     }
 
@@ -171,6 +278,31 @@ public class MenuConsole {
         return escolhida;
     }
 
+    /** Pede a disciplina, mostra os flashcards dela e pede o código do flashcard. */
+    private Optional<Flashcard> escolherFlashcard() {
+        Optional<Disciplina> disciplina = escolherDisciplina();
+        if (disciplina.isEmpty()) {
+            return Optional.empty();
+        }
+
+        List<Flashcard> lista = flashcardService.listarPorDisciplina(disciplina.get());
+        if (lista.isEmpty()) {
+            System.out.println("Esta disciplina ainda não tem flashcards.");
+            return Optional.empty();
+        }
+
+        mostrarFlashcards(lista);
+        int codigo = lerInteiro("Código do flashcard: ");
+        // Só aceita um código da lista mostrada (da disciplina escolhida).
+        Optional<Flashcard> escolhido = lista.stream()
+                .filter(f -> f.getCodigo() == codigo)
+                .findFirst();
+        if (escolhido.isEmpty()) {
+            System.out.println("[ERRO] Flashcard não encontrado nesta disciplina.");
+        }
+        return escolhido;
+    }
+
     private void mostrarDisciplinas(List<Disciplina> lista) {
         // A coluna "Disciplina" tem a largura do maior nome da lista
         // (no mínimo, a do próprio título), para a coluna "Professor" ficar alinhada.
@@ -188,6 +320,14 @@ public class MenuConsole {
         for (Disciplina d : lista) {
             String professor = d.getProfessor().isEmpty() ? "-" : d.getProfessor();
             System.out.printf(formatoLinha, d.getCodigo(), d.getNome(), professor);
+        }
+    }
+
+    private void mostrarFlashcards(List<Flashcard> lista) {
+        System.out.printf("%-6s %-6s %-14s %s%n", "Cód.", "Etapa", "Próx. revisão", "Frente");
+        for (Flashcard f : lista) {
+            System.out.printf("%-6d %-6d %-14s %s%n",
+                    f.getCodigo(), f.getEtapa(), f.getProximaRevisao().format(FORMATO_DATA), f.getFrente());
         }
     }
 
@@ -225,5 +365,20 @@ public class MenuConsole {
     private String lerTextoOpcional(String pergunta) {
         System.out.print(pergunta);
         return scanner.nextLine().trim();
+    }
+
+    /** Repete a pergunta até a resposta ser S ou N (maiúscula ou minúscula). */
+    private boolean lerSimNao(String pergunta) {
+        while (true) {
+            System.out.print(pergunta);
+            String resposta = scanner.nextLine().trim().toUpperCase();
+            if (resposta.equals("S")) {
+                return true;
+            }
+            if (resposta.equals("N")) {
+                return false;
+            }
+            System.out.println("[ERRO] Responda S (sim) ou N (não).");
+        }
     }
 }

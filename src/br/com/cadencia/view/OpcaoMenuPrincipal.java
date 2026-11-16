@@ -15,6 +15,10 @@ public enum OpcaoMenuPrincipal {
     LISTAR_DISCIPLINAS(2, "Listar disciplinas"),
     CADASTRAR_FLASHCARD(3, "Cadastrar flashcard"),
     LISTAR_FLASHCARDS(4, "Listar flashcards de uma disciplina"),
+    REVISAR_HOJE(5, "Revisar hoje"),
+    VER_HISTORICO(6, "Ver histórico de um flashcard"),
+    REMOVER_DISCIPLINA(7, "Remover disciplina"),
+    REMOVER_FLASHCARD(8, "Remover flashcard"),
     SAIR(0, "Sair");
 
     private final int codigo;

@@ -85,3 +85,59 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 **Motivo:** ganhar tempo. O que se perde: este trecho entrou sem revisão passo a passo. **Revisar antes da apresentação**, principalmente a seção 5.4 (normalização) e a decisão sobre `proxima_revisao`, que ainda precisa da confirmação do Caio e do Guilherme.
 
 **Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Camada DAO com interface e duas implementações (PostgreSQL e memória)
+
+**Contexto:** o professor pediu a comunicação com o banco. O laboratório pode não ter PostgreSQL instalado, e o sistema precisa abrir mesmo assim.
+
+**Alternativas:** classes DAO só com JDBC (o sistema não abre sem banco); ou uma interface por entidade (`DisciplinaDao`, `FlashcardDao`, `RevisaoDao`) com duas implementações, JDBC e memória.
+
+**Escolha:** interface + duas implementações. O `Main` tenta conectar; se conseguir usa as classes `...DaoJdbc`, senão avisa e usa as `...DaoMemoria`. Os services só conhecem as interfaces.
+
+**Motivo:** o sistema sempre abre, e é polimorfismo na prática (o mesmo service funciona com qualquer implementação). Também prepara os testes: unitários com a memória, de integração com o banco. O que se perde: há duas versões de cada DAO para manter, e a memória precisa imitar o `ON DELETE CASCADE` à mão.
+
+**Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Driver JDBC do PostgreSQL dentro do projeto
+
+**Contexto:** sem Maven, o `.jar` do driver precisa estar no classpath.
+
+**Alternativas:** cada um baixa o driver em cada máquina; ou o arquivo fica no repositório.
+
+**Escolha:** `lib/postgresql-42.7.4.jar` (driver oficial, baixado das releases do projeto pgjdbc no GitHub) versionado no Git.
+
+**Motivo:** funciona nas duas máquinas e no laboratório sem baixar nada. O que se perde: um arquivo binário de cerca de 1 MB no repositório, e atualizar a versão é manual.
+
+**Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Senha do banco em variável de ambiente
+
+**Contexto:** a conexão precisa de usuário e senha, e o repositório é enviado ao GitHub.
+
+**Alternativas:** escrever a senha no código; arquivo de configuração fora do Git; variáveis de ambiente.
+
+**Escolha:** variáveis `CADENCIA_DB_PASSWORD`, `CADENCIA_DB_USER` e `CADENCIA_DB_URL`, com padrões para usuário e endereço.
+
+**Motivo:** a senha nunca vai para o GitHub e não precisa de código para ler arquivo. O que se perde: é preciso definir a variável no terminal antes de rodar.
+
+**Quem decidiu:** proposta do Claude, dentro da exceção abaixo.
+
+---
+
+## [2026-11-16] Código restante gerado de uma vez, sem revisão passo a passo (exceção ao contrato)
+
+**Contexto:** aula de 16/11; o Caio pediu para completar o código conforme os requisitos e subir para mostrar ao professor no mesmo dia.
+
+**Alternativas:** seguir o contrato (explicar, confirmar e o Caio escrever parte, uma unidade por vez); ou gerar tudo agora.
+
+**Escolha:** o Claude gerou de uma vez a camada `dao` (interfaces, JDBC, memória e `ConexaoBanco`), o model `Revisao`, as regras de revisão no `FlashcardService` (RF-04, RF-05, RF-06), a remoção (RF-07), as telas novas no `MenuConsole`, o `DadosExemplo` e o driver em `lib/`. Tudo foi testado com PostgreSQL 16 e em modo memória antes de subir.
+
+**Motivo:** prazo. O que se perde: o Caio ainda não escreveu nem revisou este código. **Estudar antes da apresentação**, nesta ordem: `FlashcardService` (regra das etapas), `DisciplinaDaoJdbc` (padrão JDBC), `Main` (escolha banco ou memória), `MenuConsole.revisarHoje`.
+
+**Quem decidiu:** Caio.

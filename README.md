@@ -11,22 +11,20 @@ Projeto Integrador de Sistemas Computacionais · 4º semestre de Análise e Dese
 
 ## O que o sistema faz
 
-O aluno cadastra **disciplinas** e **flashcards** (frente = pergunta, verso = resposta). O sistema agenda a revisão de cada cartão em intervalos fixos de **1, 3, 7 e 15 dias**: se o aluno acerta, o cartão avança uma etapa; se erra, volta ao começo.
+O aluno cadastra **disciplinas** e **flashcards** (frente = pergunta, verso = resposta). O sistema agenda a revisão de cada cartão em intervalos fixos de **1, 3, 7 e 15 dias**: se o aluno acerta, o cartão avança uma etapa; se erra, volta ao começo. Cada resposta fica no histórico.
 
-## Situação atual (09/11/2026)
-
-A base do programa está pronta e roda no terminal. Por enquanto os dados ficam **em memória** (somem ao fechar o programa). A ligação com o PostgreSQL é o próximo passo; o script das tabelas (`sql/schema.sql`) já está pronto e testado.
+## Situação atual (16/11/2026)
 
 | Requisito | Descrição | Situação |
 |---|---|---|
-| RF-01 | Cadastro de disciplinas | Feito (dados em memória) |
-| RF-02 | Cadastro de flashcards | Feito (dados em memória) |
-| RF-03 | Listagem de disciplinas e de flashcards | Feito (dados em memória) |
-| RF-04 | Revisão do dia | A fazer |
-| RF-05 | Agendamento em 1, 3, 7 e 15 dias | Parcial: o cartão já nasce na etapa 0 com revisão no dia seguinte; falta avançar as etapas |
-| RF-06 | Histórico de revisões | A fazer |
-| RF-07 | Remoção com confirmação | A fazer |
-| — | Persistência no PostgreSQL (DAO + JDBC) | A fazer |
+| RF-01 | Cadastro de disciplinas | Feito |
+| RF-02 | Cadastro de flashcards | Feito |
+| RF-03 | Listagem de disciplinas e de flashcards | Feito |
+| RF-04 | Revisão do dia | Feito |
+| RF-05 | Agendamento em 1, 3, 7 e 15 dias | Feito |
+| RF-06 | Histórico de revisões | Feito |
+| RF-07 | Remoção com confirmação | Feito |
+| — | Persistência no PostgreSQL (DAO + JDBC) | Feito, com modo memória quando o banco não está disponível |
 | — | Testes com JUnit | A fazer |
 
 Os requisitos completos estão em [`docs/DOCUMENTACAO.md`](docs/DOCUMENTACAO.md) e as decisões de projeto em [`docs/DECISOES.md`](docs/DECISOES.md).
@@ -35,38 +33,62 @@ Os requisitos completos estão em [`docs/DOCUMENTACAO.md`](docs/DOCUMENTACAO.md)
 
 ```
 src/br/com/cadencia/
-├── Main.java        ponto de entrada: monta as peças e inicia o menu
-├── model/           dados: Disciplina, Flashcard
-├── service/         regras de negócio: DisciplinaService, FlashcardService
-└── view/            tela e teclado: MenuConsole, OpcaoMenuPrincipal
-sql/schema.sql       criação das tabelas no PostgreSQL
-docs/                documentação e registro de decisões
+├── Main.java          ponto de entrada: escolhe banco ou memória e monta as peças
+├── DadosExemplo.java  dados para demonstração (opção --exemplo)
+├── model/             dados: Disciplina, Flashcard, Revisao
+├── service/           regras de negócio: DisciplinaService, FlashcardService
+├── dao/               acesso aos dados
+│     ├── DisciplinaDao, FlashcardDao, RevisaoDao      interfaces (o que precisa ser guardado)
+│     ├── ...DaoJdbc + ConexaoBanco                    implementação com PostgreSQL (JDBC)
+│     └── ...DaoMemoria                                implementação em memória
+└── view/              tela e teclado: MenuConsole, OpcaoMenuPrincipal
+lib/postgresql-42.7.4.jar   driver JDBC oficial do PostgreSQL
+sql/schema.sql              criação das tabelas
+docs/                       documentação, diagramas e registro de decisões
 ```
 
-Fluxo: o usuário digita na **view**, que chama o **service** (onde ficam as regras), que usa o **model** (os dados). Na próxima etapa entra a camada **dao** (JDBC) entre o service e o banco.
+Fluxo: o usuário digita na **view**, que chama o **service** (onde ficam as regras), que usa um **dao** (que grava no banco ou na memória). O service só conhece as interfaces do dao, então funciona igual nos dois casos.
 
 ## Como executar
 
-Requisito: JDK 21. Na pasta do projeto (PowerShell):
+Requisito: JDK 17 ou mais novo (o projeto usa Java 21). Na pasta do projeto, compile:
 
 ```powershell
 javac -encoding UTF-8 -d bin -sourcepath src src\br\com\cadencia\Main.java
-java -cp bin br.com.cadencia.Main
 ```
 
-## Banco de dados
-
-Cria o banco e as tabelas (testado no PostgreSQL 16):
+### Sem banco (dados em memória)
 
 ```powershell
-psql -U postgres -c "CREATE DATABASE cadencia;"
-psql -U postgres -d cadencia -f sql/schema.sql
+java -cp bin br.com.cadencia.Main --exemplo
 ```
+
+O `--exemplo` carrega 2 disciplinas e 5 flashcards, 3 deles para revisar hoje (um cartão novo só vence amanhã). Sem ele, o sistema começa vazio.
+
+### Com PostgreSQL
+
+1. Crie o banco e as tabelas (uma vez só):
+
+   ```powershell
+   psql -U postgres -c "CREATE DATABASE cadencia;"
+   psql -U postgres -d cadencia -f sql\schema.sql
+   ```
+
+2. Informe a senha do usuário `postgres` e rode com o driver no classpath:
+
+   ```powershell
+   $env:CADENCIA_DB_PASSWORD = "sua_senha"
+   java -cp "bin;lib\postgresql-42.7.4.jar" br.com.cadencia.Main --exemplo
+   ```
+
+Na abertura o programa mostra `[BANCO] Conectado ao PostgreSQL` ou, se algo faltar, `[AVISO] Sem PostgreSQL: <motivo>` e segue em memória.
+
+Outras variáveis (opcionais): `CADENCIA_DB_URL` (padrão `jdbc:postgresql://localhost:5432/cadencia`) e `CADENCIA_DB_USER` (padrão `postgres`). A senha nunca fica escrita no código.
+
+No Linux, macOS ou GitHub Codespaces, troque `\` por `/` e use `:` no lugar de `;` no `-cp`.
 
 ## Próximos passos
 
-1. Camada DAO com JDBC, para gravar no PostgreSQL
-2. Revisão do dia e agendamento (RF-04 e RF-05)
-3. Histórico (RF-06) e remoção (RF-07)
-4. Testes com JUnit
-5. Diagramas: DER, modelo lógico e mapa de navegação
+1. Testes com JUnit: unitários da regra das etapas e de integração dos DAOs JDBC
+2. Diagramas restantes: casos de uso, mapa de navegação, classes e sequência
+3. Validação com colegas de turma
