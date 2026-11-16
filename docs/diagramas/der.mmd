@@ -1,0 +1,24 @@
+%%{init: {"theme":"base","fontFamily":"Liberation Sans, Arial, sans-serif","themeCSS":".labelBkg{background-color:#ffffff !important;} .edgeLabel{background-color:#ffffff !important;}","themeVariables":{"background":"#ffffff","primaryColor":"#ffffff","primaryTextColor":"#000000","primaryBorderColor":"#000000","secondaryColor":"#ffffff","tertiaryColor":"#ffffff","lineColor":"#000000","textColor":"#000000","mainBkg":"#ffffff","nodeBorder":"#000000","edgeLabelBackground":"#ffffff","attributeBackgroundColorOdd":"#ffffff","attributeBackgroundColorEven":"#ffffff","fontFamily":"Liberation Sans, Arial, sans-serif","fontSize":"16px"}}}%%
+erDiagram
+    DISCIPLINA ||--o{ FLASHCARD : possui
+    FLASHCARD ||--o{ REVISAO : "é revisado em"
+
+    DISCIPLINA {
+        int id_disciplina PK
+        string nome "único"
+        string professor "opcional"
+    }
+
+    FLASHCARD {
+        int id_flashcard PK
+        string frente
+        string verso
+        int etapa "0 a 3"
+        date proxima_revisao "derivado"
+    }
+
+    REVISAO {
+        int id_revisao PK
+        datetime revisado_em
+        boolean acertou
+    }

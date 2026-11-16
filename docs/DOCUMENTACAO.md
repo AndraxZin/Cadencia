@@ -97,3 +97,42 @@ Critérios de aceitação:
 - A opção "Ver histórico" aparece depois de escolher um flashcard.
 - O histórico mostra colunas alinhadas com a data e se acertou, da revisão mais recente para a mais antiga.
 - Sem revisões, exibe "Este flashcard ainda não foi revisado".
+
+---
+
+## 5. Modelagem de dados
+
+A modelagem segue três níveis: conceitual (o problema, sem detalhes de banco), lógico (as tabelas) e físico (o script SQL). Os diagramas são gerados a partir dos arquivos `.mmd` da pasta `docs/diagramas`.
+
+### 5.1 Modelo conceitual (DER)
+
+![DER do Cadência](diagramas/der.png)
+
+Entidades:
+
+- **DISCIPLINA:** a matéria cadastrada pelo aluno. O nome é único e o professor é opcional.
+- **FLASHCARD:** o cartão de estudo, com frente (pergunta) e verso (resposta). Guarda a etapa (0 a 3) e a data da próxima revisão.
+- **REVISAO:** cada vez que o aluno estuda um cartão, com a data e hora e se acertou.
+
+Relacionamentos:
+
+- Uma disciplina possui zero ou mais flashcards; cada flashcard pertence a exatamente uma disciplina (1:N).
+- Um flashcard é revisado zero ou mais vezes; cada revisão é de exatamente um flashcard (1:N).
+
+`proxima_revisao` é um atributo derivado: pode ser calculado a partir da etapa e da data da última revisão. Ele é armazenado para que a busca dos cartões do dia seja uma consulta simples (ver `DECISOES.md`, 09/11).
+
+### 5.2 Modelo lógico
+
+![Modelo lógico do Cadência](diagramas/modelo-logico.png)
+
+Cada relacionamento 1:N virou uma chave estrangeira no lado N: `flashcard.id_disciplina` referencia `disciplina`, e `revisao.id_flashcard` referencia `flashcard`. As duas usam `ON DELETE CASCADE`: apagar uma disciplina apaga os seus flashcards, e apagar um flashcard apaga as suas revisões.
+
+### 5.3 Modelo físico
+
+O script `sql/schema.sql` cria as tabelas no PostgreSQL 16 com chave primária, chave estrangeira, `UNIQUE`, `CHECK` e índices.
+
+### 5.4 Normalização
+
+- **1FN:** todos os atributos são atômicos. Não há listas dentro de uma coluna: as revisões ficam em tabela própria, uma por linha.
+- **2FN:** cada tabela tem chave primária de uma coluna só, então nenhum atributo depende de parte da chave.
+- **3FN:** nenhum atributo comum depende de outro atributo comum da mesma tabela. `proxima_revisao` não é determinada só pela `etapa` (dois cartões na mesma etapa podem ter datas diferentes); ela depende também da data da última revisão, que está em outra tabela. A redundância em relação ao histórico é intencional e está registrada em `DECISOES.md`.

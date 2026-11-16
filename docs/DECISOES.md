@@ -57,3 +57,31 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 **Motivo:** havia pouco tempo. O que se perde: o combinado de explicar antes de escrever, uma unidade por vez. Para compensar, Caio estuda a base arquivo por arquivo, e as próximas funcionalidades (DAO/JDBC, revisão, histórico, testes) serão feitas passo a passo.
 
 **Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Diagramas de modelagem em Mermaid, preto e branco
+
+**Contexto:** o guia de modelagem do professor exige o DER e o modelo lógico com fundo branco, linhas pretas e sem cores.
+
+**Alternativas:** desenhar à mão no brModelo ou no draw.io (precisa de computador); ou gerar o diagrama a partir de texto com Mermaid.
+
+**Escolha:** Mermaid. Os arquivos-fonte `.mmd` ficam em `docs/diagramas`, e as imagens `.png` são geradas a partir deles.
+
+**Motivo:** o texto fica versionado no Git e pode ser editado até pelo celular; o desenho de exemplo do guia segue o mesmo estilo. O que se perde: o posicionamento das caixas é automático, sem controle fino do layout.
+
+**Quem decidiu:** proposta do Claude, aceita pelo Caio junto com a exceção abaixo.
+
+---
+
+## [2026-11-16] Seção de modelagem subida antes da confirmação de entendimento (exceção ao contrato)
+
+**Contexto:** aula de 16/11 e pedido do professor para acelerar a documentação.
+
+**Alternativas:** esperar o Caio confirmar o entendimento do DER (regra 3 do contrato) ou subir já.
+
+**Escolha:** subir o DER, o modelo lógico, a seção 5 da documentação (incluindo a análise de normalização) e o PDF antes da confirmação, a pedido do Caio.
+
+**Motivo:** ganhar tempo. O que se perde: este trecho entrou sem revisão passo a passo. **Revisar antes da apresentação**, principalmente a seção 5.4 (normalização) e a decisão sobre `proxima_revisao`, que ainda precisa da confirmação do Caio e do Guilherme.
+
+**Quem decidiu:** Caio.

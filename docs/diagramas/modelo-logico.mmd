@@ -1,0 +1,26 @@
+%%{init: {"theme":"base","fontFamily":"Liberation Sans, Arial, sans-serif","themeCSS":".labelBkg{background-color:#ffffff !important;} .edgeLabel{background-color:#ffffff !important;}","themeVariables":{"background":"#ffffff","primaryColor":"#ffffff","primaryTextColor":"#000000","primaryBorderColor":"#000000","secondaryColor":"#ffffff","tertiaryColor":"#ffffff","lineColor":"#000000","textColor":"#000000","mainBkg":"#ffffff","nodeBorder":"#000000","edgeLabelBackground":"#ffffff","attributeBackgroundColorOdd":"#ffffff","attributeBackgroundColorEven":"#ffffff","fontFamily":"Liberation Sans, Arial, sans-serif","fontSize":"16px"}}}%%
+erDiagram
+    disciplina ||--o{ flashcard : "fk_flashcard_disciplina"
+    flashcard ||--o{ revisao : "fk_revisao_flashcard"
+
+    disciplina {
+        INT id_disciplina PK
+        VARCHAR(100) nome UK
+        VARCHAR(100) professor
+    }
+
+    flashcard {
+        INT id_flashcard PK
+        INT id_disciplina FK
+        TEXT frente
+        TEXT verso
+        SMALLINT etapa "CHECK 0 a 3"
+        DATE proxima_revisao
+    }
+
+    revisao {
+        INT id_revisao PK
+        INT id_flashcard FK
+        TIMESTAMPTZ revisado_em
+        BOOLEAN acertou
+    }
