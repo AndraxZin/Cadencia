@@ -6,6 +6,7 @@ Integrantes: Caio Andrax Portela Carvalho e Guilherme Pinheiro
 
 > O que já está implementado em cada requisito aparece na tabela de situação do [README](../README.md).
 > A especificação completa (casos de uso, regras de negócio e telas) está no [Documento de Requisitos](REQUISITOS.md).
+> O roteiro e os resultados da validação com usuários estão em [VALIDACAO.md](VALIDACAO.md).
 
 ---
 
@@ -98,7 +99,7 @@ Critérios de aceitação:
 
 Critérios de aceitação:
 
-- A opção "Ver histórico" aparece depois de escolher um flashcard.
+- A opção "Ver histórico de um flashcard" pede a disciplina e o flashcard e então mostra o histórico.
 - O histórico mostra colunas alinhadas com a data e se acertou, da revisão mais recente para a mais antiga.
 - Sem revisões, exibe "Este flashcard ainda não foi revisado".
 
@@ -140,3 +141,116 @@ O script `sql/schema.sql` cria as tabelas no PostgreSQL 16 com chave primária, 
 - **1FN:** todos os atributos são atômicos. Não há listas dentro de uma coluna: as revisões ficam em tabela própria, uma por linha.
 - **2FN:** cada tabela tem chave primária de uma coluna só, então nenhum atributo depende de parte da chave.
 - **3FN:** nenhum atributo comum depende de outro atributo comum da mesma tabela. `proxima_revisao` não é determinada só pela `etapa` (dois cartões na mesma etapa podem ter datas diferentes); ela depende também da data da última revisão, que está em outra tabela. A redundância em relação ao histórico é intencional e está registrada em `DECISOES.md`.
+
+---
+
+## 6. Arquitetura
+
+### 6.1 Camadas
+
+O código fica em `src/br/com/cadencia`, separado em camadas. Cada camada tem uma responsabilidade só:
+
+- **view** (`MenuConsole`, `OpcaoMenuPrincipal`): mostra os menus e lê o teclado. Não decide regra nenhuma.
+- **service** (`DisciplinaService`, `FlashcardService`): as regras de negócio, como "nome não repete" e "acerto sobe uma etapa".
+- **dao** (`DisciplinaDao`, `FlashcardDao`, `RevisaoDao`): guarda e busca os dados. Cada DAO é uma interface com duas implementações: `...DaoJdbc`, que usa o PostgreSQL via JDBC, e `...DaoMemoria`, que usa listas em memória. `ConexaoBanco` abre a conexão.
+- **model** (`Disciplina`, `Flashcard`, `Revisao`): os dados de cada entidade.
+- **Main**: tenta conectar ao PostgreSQL. Se conseguir, entrega aos services os DAOs JDBC; se não, avisa e entrega os DAOs em memória.
+
+Como os services só conhecem as interfaces dos DAOs, as mesmas regras funcionam com o banco e com a memória (polimorfismo).
+
+### 6.2 Diagrama de classes
+
+![Diagrama de classes do Cadência](diagramas/classes.png)
+
+### 6.3 Diagrama de sequência: revisar os flashcards do dia
+
+![Diagrama de sequência da revisão do dia](diagramas/sequencia-revisar-hoje.png)
+
+### 6.4 Diagrama de implantação
+
+![Diagrama de implantação do Cadência](diagramas/implantacao.png)
+
+O programa e o banco rodam no computador do estudante. O programa fala com o PostgreSQL pelo driver JDBC (`lib/postgresql-42.7.4.jar`), por uma conexão TCP local na porta 5432.
+
+---
+
+## 7. Mapa de navegação
+
+![Mapa de navegação dos menus](diagramas/mapa-navegacao.png)
+
+Ao abrir, o programa informa se está usando o banco ou a memória e mostra o menu principal. Cada opção pede os dados de que precisa, mostra o resultado e volta ao menu. A opção 0 encerra o programa.
+
+---
+
+## 8. Testes
+
+### 8.1 Estratégia
+
+- **Testes unitários** (`FlashcardServiceTest`, `DisciplinaServiceTest`): testam as regras dos services usando os DAOs em memória. Rodam sem banco e em milissegundos.
+- **Testes de integração** (`DaoJdbcIntegracaoTest`): testam os DAOs JDBC com o PostgreSQL de verdade. Cada teste roda dentro de uma transação desfeita no fim (rollback), então o banco fica como estava. Sem PostgreSQL disponível, esses testes são pulados, em vez de falhar.
+
+Os testes usam JUnit 5 (`lib/junit-platform-console-standalone-1.9.1.jar`) e ficam na pasta `test`.
+
+### 8.2 Como executar
+
+Na pasta do projeto (PowerShell):
+
+```powershell
+javac -encoding UTF-8 -d bin-test -cp lib\junit-platform-console-standalone-1.9.1.jar -sourcepath "src;test" test\br\com\cadencia\service\FlashcardServiceTest.java test\br\com\cadencia\service\DisciplinaServiceTest.java test\br\com\cadencia\dao\DaoJdbcIntegracaoTest.java
+$env:CADENCIA_DB_PASSWORD = "sua_senha"
+java -jar lib\junit-platform-console-standalone-1.9.1.jar execute --class-path "bin-test;lib\postgresql-42.7.4.jar" --select-package br.com.cadencia --details=tree
+```
+
+### 8.3 Casos de teste e resultados
+
+Execução em 16/11/2026, com Java 21 e PostgreSQL 16: **20 testes, 20 aprovados, 0 falhas**. Sem o PostgreSQL disponível, 14 são aprovados e os 6 de integração são pulados.
+
+| ID | Teste | Tipo | Requisito | Resultado |
+|---|---|---|---|---|
+| T01 | Acerto na etapa 0 vai para a etapa 1 | Unitário | RF-05 | Aprovado |
+| T02 | Acerto na etapa 3 continua na etapa 3 | Unitário | RF-05 | Aprovado |
+| T03 | Intervalos das etapas: 1, 3, 7 e 15 dias | Unitário | RF-05 | Aprovado |
+| T04 | Flashcard novo nasce na etapa 0, com revisão amanhã | Unitário | RF-02 | Aprovado |
+| T05 | Frente vazia é recusada | Unitário | RF-02 | Aprovado |
+| T06 | Cartão novo não entra na revisão de hoje | Unitário | RF-04 | Aprovado |
+| T07 | Acertar: sobe uma etapa, agenda em 3 dias e grava no histórico | Unitário | RF-05, RF-06 | Aprovado |
+| T08 | Errar: volta para a etapa 0 e agenda para amanhã | Unitário | RF-05, RF-06 | Aprovado |
+| T09 | Histórico vem da revisão mais recente para a mais antiga | Unitário | RF-06 | Aprovado |
+| T10 | Cadastra a disciplina e tira os espaços das pontas | Unitário | RF-01, RF-03 | Aprovado |
+| T11 | Nome repetido é recusado, mesmo com maiúsculas diferentes | Unitário | RF-01 | Aprovado |
+| T12 | Nome vazio é recusado | Unitário | RF-01 | Aprovado |
+| T13 | Nome com mais de 100 caracteres é recusado | Unitário | RF-01 | Aprovado |
+| T14 | Remover a disciplina remove também os flashcards dela | Unitário | RF-07 | Aprovado |
+| T15 | Grava a disciplina e a encontra pelo código gerado pelo banco | Integração | RF-01, RNF-03 | Aprovado |
+| T16 | Flashcard vencido entra na revisão do dia; o de amanhã não | Integração | RF-04, RNF-03 | Aprovado |
+| T17 | Atualizar a agenda grava a nova etapa e a nova data | Integração | RF-05, RNF-03 | Aprovado |
+| T18 | Revisão gravada aparece no histórico do flashcard | Integração | RF-06, RNF-03 | Aprovado |
+| T19 | Remover a disciplina apaga flashcards e histórico (ON DELETE CASCADE) | Integração | RF-07, RNF-03 | Aprovado |
+| T20 | O banco recusa nome de disciplina repetido (UNIQUE) | Integração | RF-01, RNF-03 | Aprovado |
+
+---
+
+## 9. Validação com usuários
+
+Para conferir se o sistema atende o demandante, 2 ou 3 colegas de turma (estudantes do período noturno, o público do Cadência) usam o sistema sozinhos e fazem uma tarefa para cada história de usuário. O aplicador observa e anota se cada critério de aceitação foi cumprido. O roteiro, a ficha e os resultados estão em [VALIDACAO.md](VALIDACAO.md).
+
+---
+
+## 10. Matriz de rastreabilidade
+
+Liga cada requisito à história de usuário, ao caso de uso, ao código, aos testes e ao passo da demonstração em que ele aparece.
+
+| Requisito | História | Caso de uso | Onde está no código | Testes | Demonstração |
+|---|---|---|---|---|---|
+| RF-01 Cadastro de disciplinas | — | CU01 | `DisciplinaService.cadastrar`, `DisciplinaDao.inserir` | T10 a T13, T15, T20 | passo 2 |
+| RF-02 Cadastro de flashcards | US-01 | CU02 | `FlashcardService.cadastrar`, `FlashcardDao.inserir` | T04, T05 | passo 3 |
+| RF-03 Listagem | — | CU03 | `DisciplinaService.listar`, `FlashcardService.listarPorDisciplina` | T10 | passo 4 |
+| RF-04 Revisão do dia | US-02 | CU04 | `FlashcardService.listarParaRevisarHoje`, `MenuConsole.revisarHoje` | T06, T16 | passo 5 |
+| RF-05 Intervalos fixos | US-02 | CU04 | `FlashcardService.proximaEtapa`, `intervaloEmDias`, `registrarResposta` | T01 a T03, T07, T08, T17 | passos 5 e 6 |
+| RF-06 Histórico | US-03 | CU05 | `FlashcardService.listarHistorico`, `RevisaoDao` | T07 a T09, T18 | passo 7 |
+| RF-07 Remoção com confirmação | — | CU06, CU07 | `DisciplinaService.remover`, `FlashcardService.remover`, `ON DELETE CASCADE` | T14, T19 | passo 8 |
+| RNF-03 PostgreSQL via JDBC | — | todos | `dao/...DaoJdbc`, `ConexaoBanco`, `sql/schema.sql` | T15 a T20 | passos 1 e 9 |
+| RNF-04 Robustez | — | todos | `MenuConsole` (`lerInteiro`, `lerSimNao`, tratamento de `AcessoDadosException`) | — (verificado na demonstração) | passo 2 |
+| RNF-06 Sem banco, em memória | — | todos | `Main`, `...DaoMemoria` | T01 a T14 (usam a memória) | plano B |
+
+Passos da demonstração: 1 abrir com o banco; 2 cadastrar disciplina e tentar um nome repetido; 3 cadastrar flashcard; 4 listar; 5 revisar hoje; 6 listar de novo e ver as novas datas; 7 ver o histórico; 8 remover uma disciplina; 9 fechar e abrir de novo para ver os dados no banco.

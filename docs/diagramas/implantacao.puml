@@ -1,0 +1,21 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam defaultFontName "Liberation Sans"
+skinparam defaultFontSize 13
+skinparam nodeBackgroundColor white
+skinparam databaseBackgroundColor white
+skinparam artifactBackgroundColor white
+actor Estudante
+node "Computador do estudante" {
+  node "JVM (Java 17 ou superior)" {
+    artifact "Cadência\n(classes Java em bin/)" as APP
+    artifact "postgresql-42.7.4.jar\n(driver JDBC)" as DRV
+  }
+  database "PostgreSQL 16\nbanco cadencia" as DB
+}
+Estudante --> APP : terminal\n(teclado e tela)
+APP --> DRV : JDBC (java.sql)
+DRV --> DB : TCP localhost:5432
+@enduml

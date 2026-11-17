@@ -155,3 +155,45 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 **Motivo:** a especificação fica completa e serve de base para a matriz de rastreabilidade e para os testes. O que se perde: são dois documentos que precisam continuar coerentes. Junto com isso, o RF-03 passou a se chamar "Listagem" (não existe busca por texto) e entraram o RNF-06 (funciona em memória sem banco), o RNF-07 (senha em variável de ambiente) e o RNF-08 (usabilidade). O diagrama de casos de uso foi feito pelo Claude; se o Guilherme já tiver o dele, ele substitui este.
 
 **Quem decidiu:** Caio, dentro da exceção ao contrato de 16/11.
+
+---
+
+## [2026-11-16] Testes com JUnit: unitários em memória e de integração com o PostgreSQL
+
+**Contexto:** a documentação promete testes unitários e de integração com JUnit (objetivo 4), e o professor vai avaliar se o que foi prometido foi cumprido.
+
+**Alternativas:** tirar a promessa do documento; testar só os services; ou testar os services (unitários) e os DAOs JDBC (integração).
+
+**Escolha:** 14 testes unitários dos services usando os DAOs em memória (rodam sem banco) e 6 de integração dos DAOs JDBC com o PostgreSQL. Cada teste de integração roda numa transação desfeita no fim (rollback), e todos são pulados se não houver banco. O `.jar` do JUnit (`junit-platform-console-standalone-1.9.1.jar`) veio do pacote `junit5` do Ubuntu, porque o site oficial (Maven Central) estava bloqueado no ambiente do Claude. A versão oficial funciona igual.
+
+**Motivo:** a interface do DAO deixa testar as regras sem banco, e o rollback mantém o banco limpo. O que se perde: mais um `.jar` no repositório. Um teste análogo ficou para o Caio escrever (regra 6 do contrato): "Erro na etapa 2 volta para a etapa 0".
+
+**Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Validação com colegas de turma
+
+**Contexto:** a documentação promete validar o sistema com colegas (objetivo 5), e isso conta na parte extensionista.
+
+**Alternativas:** tirar a promessa; ou aplicar um roteiro curto com 2 ou 3 colegas antes do congelamento do documento (23/11).
+
+**Escolha:** aplicar o roteiro de `docs/VALIDACAO.md` (uma tarefa por história de usuário, mais 3 perguntas), registrando os participantes sem nome completo.
+
+**Motivo:** é rápido e mostra o sistema sendo usado pelo público-alvo. O que se perde: o resultado depende de os colegas terem tempo durante a semana.
+
+**Quem decidiu:** Caio.
+
+---
+
+## [2026-11-16] Diagramas e matriz gerados em lote (exceção ao contrato)
+
+**Contexto:** o professor congela o documento na segunda, 23/11, e o Cronograma pede mapa de navegação, diagramas de classes e de sequência, e matriz de rastreabilidade.
+
+**Alternativas:** um documento por vez, com explicação e confirmação (regra 2); ou todos de uma vez.
+
+**Escolha:** o Claude gerou de uma vez o mapa de navegação, os diagramas de classes, de sequência (revisão do dia) e de implantação, a matriz de rastreabilidade e as seções 6 a 10 da documentação, além de corrigir o critério da US-03 para bater com o sistema.
+
+**Motivo:** prazo. O que se perde: o Caio revisa e estuda depois. **Antes da apresentação**, conferir cada diagrama contra o sistema rodando.
+
+**Quem decidiu:** Caio.

@@ -1,0 +1,98 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam classBackgroundColor white
+skinparam packageBackgroundColor white
+skinparam defaultFontName "Liberation Sans"
+skinparam defaultFontSize 13
+skinparam classAttributeIconSize 0
+skinparam nodesep 25
+skinparam ranksep 45
+hide empty members
+
+class Main {
+  +main(args)
+}
+
+package "view" {
+  class MenuConsole {
+    +iniciar()
+    -revisarHoje()
+    -verHistorico()
+  }
+  enum OpcaoMenuPrincipal
+}
+
+package "service" {
+  class DisciplinaService {
+    +cadastrar(nome, professor) : Disciplina
+    +listar() : List<Disciplina>
+    +remover(disciplina)
+  }
+  class FlashcardService {
+    +cadastrar(disciplina, frente, verso) : Flashcard
+    +listarParaRevisarHoje() : List<Flashcard>
+    +registrarResposta(flashcard, acertou) : LocalDate
+    +listarHistorico(flashcard) : List<Revisao>
+    {static} +proximaEtapa(etapa, acertou) : int
+    {static} +intervaloEmDias(etapa) : int
+  }
+}
+
+package "dao" {
+  interface DisciplinaDao
+  interface FlashcardDao
+  interface RevisaoDao
+  class DisciplinaDaoJdbc
+  class DisciplinaDaoMemoria
+  class FlashcardDaoJdbc
+  class FlashcardDaoMemoria
+  class RevisaoDaoJdbc
+  class RevisaoDaoMemoria
+  class ConexaoBanco {
+    {static} +abrir() : Connection
+  }
+}
+
+package "model" {
+  class Disciplina {
+    -codigo : int
+    -nome : String
+    -professor : String
+  }
+  class Flashcard {
+    -codigo : int
+    -frente : String
+    -verso : String
+    -etapa : int
+    -proximaRevisao : LocalDate
+    +reagendar(etapa, data)
+  }
+  class Revisao {
+    -codigo : int
+    -revisadoEm : LocalDateTime
+    -acertou : boolean
+  }
+}
+
+Main ..> MenuConsole : cria
+Main ..> ConexaoBanco : usa
+MenuConsole -right..> OpcaoMenuPrincipal
+MenuConsole --> DisciplinaService
+MenuConsole --> FlashcardService
+DisciplinaService --> DisciplinaDao
+FlashcardService --> FlashcardDao
+FlashcardService --> RevisaoDao
+
+DisciplinaDao <|.. DisciplinaDaoJdbc
+DisciplinaDao <|.. DisciplinaDaoMemoria
+FlashcardDao <|.. FlashcardDaoJdbc
+FlashcardDao <|.. FlashcardDaoMemoria
+RevisaoDao <|.. RevisaoDaoJdbc
+RevisaoDao <|.. RevisaoDaoMemoria
+
+FlashcardDaoJdbc -[hidden]down- Flashcard
+Revisao "0..*" -right---> "1" Flashcard
+Flashcard "0..*" -right---> "1" Disciplina
+@enduml

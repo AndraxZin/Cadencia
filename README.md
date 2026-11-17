@@ -25,7 +25,7 @@ O aluno cadastra **disciplinas** e **flashcards** (frente = pergunta, verso = re
 | RF-06 | Histórico de revisões | Feito |
 | RF-07 | Remoção com confirmação | Feito |
 | — | Persistência no PostgreSQL (DAO + JDBC) | Feito, com modo memória quando o banco não está disponível |
-| — | Testes com JUnit | A fazer |
+| — | Testes com JUnit (14 unitários + 6 de integração) | Feito |
 
 Os requisitos completos estão em [`docs/DOCUMENTACAO.md`](docs/DOCUMENTACAO.md) e as decisões de projeto em [`docs/DECISOES.md`](docs/DECISOES.md).
 
@@ -42,7 +42,9 @@ src/br/com/cadencia/
 │     ├── ...DaoJdbc + ConexaoBanco                    implementação com PostgreSQL (JDBC)
 │     └── ...DaoMemoria                                implementação em memória
 └── view/              tela e teclado: MenuConsole, OpcaoMenuPrincipal
+test/br/com/cadencia/       testes JUnit (service: unitários; dao: integração)
 lib/postgresql-42.7.4.jar   driver JDBC oficial do PostgreSQL
+lib/junit-platform-console-standalone-1.9.1.jar   JUnit 5 (para rodar os testes)
 sql/schema.sql              criação das tabelas
 docs/                       documentação, diagramas e registro de decisões
 ```
@@ -87,8 +89,29 @@ Outras variáveis (opcionais): `CADENCIA_DB_URL` (padrão `jdbc:postgresql://loc
 
 No Linux, macOS ou GitHub Codespaces, troque `\` por `/` e use `:` no lugar de `;` no `-cp`.
 
+## Como rodar os testes
+
+```powershell
+javac -encoding UTF-8 -d bin-test -cp lib\junit-platform-console-standalone-1.9.1.jar -sourcepath "src;test" test\br\com\cadencia\service\FlashcardServiceTest.java test\br\com\cadencia\service\DisciplinaServiceTest.java test\br\com\cadencia\dao\DaoJdbcIntegracaoTest.java
+$env:CADENCIA_DB_PASSWORD = "sua_senha"
+java -jar lib\junit-platform-console-standalone-1.9.1.jar execute --class-path "bin-test;lib\postgresql-42.7.4.jar" --select-package br.com.cadencia --details=tree
+```
+
+Sem o PostgreSQL, os 14 testes unitários rodam e os 6 de integração são pulados. A lista completa dos testes está na seção 8 de [`docs/DOCUMENTACAO.md`](docs/DOCUMENTACAO.md).
+
+## Preparar a demonstração (zerar o banco)
+
+Cartões revisados num ensaio saem do "Revisar hoje". Antes de apresentar, recrie o banco e abra com os dados de exemplo:
+
+```powershell
+psql -U postgres -c "DROP DATABASE IF EXISTS cadencia;"
+psql -U postgres -c "CREATE DATABASE cadencia;"
+psql -U postgres -d cadencia -f sql\schema.sql
+$env:CADENCIA_DB_PASSWORD = "sua_senha"
+java -cp "bin;lib\postgresql-42.7.4.jar" br.com.cadencia.Main --exemplo
+```
+
 ## Próximos passos
 
-1. Testes com JUnit: unitários da regra das etapas e de integração dos DAOs JDBC
-2. Diagramas restantes: casos de uso, mapa de navegação, classes e sequência
-3. Validação com colegas de turma
+1. Validação com 2 ou 3 colegas de turma ([`docs/VALIDACAO.md`](docs/VALIDACAO.md))
+2. Apresentação final

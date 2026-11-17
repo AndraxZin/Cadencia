@@ -1,0 +1,20 @@
+%%{init: {"theme":"base","fontFamily":"Liberation Sans, Arial, sans-serif","themeCSS":".labelBkg{background-color:#ffffff !important;} .edgeLabel{background-color:#ffffff !important;}","themeVariables":{"background":"#ffffff","primaryColor":"#ffffff","primaryTextColor":"#000000","primaryBorderColor":"#000000","secondaryColor":"#ffffff","tertiaryColor":"#ffffff","lineColor":"#000000","textColor":"#000000","mainBkg":"#ffffff","nodeBorder":"#000000","edgeLabelBackground":"#ffffff","clusterBkg":"#ffffff","clusterBorder":"#000000","fontFamily":"Liberation Sans, Arial, sans-serif","fontSize":"15px"}}}%%
+flowchart TD
+    INICIO(["Abrir o programa<br/>(java ... Main)"]) --> CONEXAO{"Conectou ao<br/>PostgreSQL?"}
+    CONEXAO -- sim --> BANCO["[BANCO] dados no PostgreSQL"]
+    CONEXAO -- não --> MEMORIA["[AVISO] dados em memória"]
+    BANCO --> MENU
+    MEMORIA --> MENU
+    MENU["MENU PRINCIPAL"]
+    MENU -- 1 --> O1["Cadastrar disciplina<br/>nome → professor"]
+    MENU -- 2 --> O2["Listar disciplinas"]
+    MENU -- 3 --> O3["Cadastrar flashcard<br/>disciplina → frente → verso"]
+    MENU -- 4 --> O4["Listar flashcards<br/>disciplina → tabela"]
+    MENU -- 5 --> O5["Revisar hoje<br/>frente → Enter → verso → S/N"]
+    MENU -- 6 --> O6["Ver histórico<br/>disciplina → flashcard"]
+    MENU -- 7 --> O7["Remover disciplina<br/>disciplina → S/N"]
+    MENU -- 8 --> O8["Remover flashcard<br/>disciplina → flashcard → S/N"]
+    MENU -- 0 --> FIM(["Sair"])
+    O1 & O2 & O3 & O4 --> VOLTA["volta ao menu"]
+    O5 & O6 & O7 & O8 --> VOLTA
+    VOLTA --> MENU
