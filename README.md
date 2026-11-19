@@ -51,6 +51,29 @@ docs/                       documentação, diagramas e registro de decisões
 
 Fluxo: o usuário digita na **view**, que chama o **service** (onde ficam as regras), que usa um **dao** (que grava no banco ou na memória). O service só conhece as interfaces do dao, então funciona igual nos dois casos.
 
+## Rodar no GitHub Codespaces (recomendado para apresentar)
+
+O Codespaces é um computador Linux na nuvem que abre no navegador, já com Java 21 e PostgreSQL 16. Não precisa instalar nada no computador da apresentação, só ter internet e entrar no GitHub.
+
+1. No GitHub: botão verde **Code** → aba **Codespaces** → **Create codespace on main**.
+2. Espere a primeira preparação terminar (alguns minutos, só na primeira vez). O `.devcontainer` instala o Java e o PostgreSQL e roda o `scripts/preparar-banco.sh`, que liga o banco, cria o usuário `cadencia` com uma senha sorteada (guardada fora do repositório, em `~/.cadencia-env`), cria o banco e as tabelas.
+3. No terminal do Codespace:
+
+   ```bash
+   bash scripts/rodar.sh --exemplo
+   ```
+
+   Deve aparecer `[BANCO] Conectado ao PostgreSQL`.
+
+Antes de apresentar, zere o banco para os cartões de exemplo voltarem a vencer hoje:
+
+```bash
+bash scripts/preparar-banco.sh --zerar
+bash scripts/rodar.sh --exemplo
+```
+
+Os mesmos dois scripts funcionam em qualquer Linux com `apt` (Ubuntu, Debian), não só no Codespaces.
+
 ## Como executar
 
 Requisito: JDK 17 ou mais novo (o projeto usa Java 21). Na pasta do projeto, compile:

@@ -1,0 +1,11 @@
+{
+  "name": "Cadência (Java 21 + PostgreSQL 16)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21"
+    }
+  },
+  "postCreateCommand": "bash scripts/preparar-banco.sh",
+  "postStartCommand": "sudo service postgresql start"
+}

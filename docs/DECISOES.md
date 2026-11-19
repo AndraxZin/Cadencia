@@ -197,3 +197,17 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 **Motivo:** prazo. O que se perde: o Caio revisa e estuda depois. **Antes da apresentação**, conferir cada diagrama contra o sistema rodando.
 
 **Quem decidiu:** Caio.
+
+---
+
+## [2026-11-19] Demonstração pelo GitHub Codespaces, com scripts de preparo do banco
+
+**Contexto:** a apresentação deve ser no notebook do professor, sem garantia de que ele tenha Java, PostgreSQL ou a senha do banco. Se o sistema não abrir com o banco, a promessa do RNF-03 fica sem demonstração.
+
+**Alternativas:** instalar tudo no notebook na hora; levar um notebook próprio; demonstrar só em memória; ou rodar num ambiente na nuvem que abre pelo navegador.
+
+**Escolha:** GitHub Codespaces. O `.devcontainer/devcontainer.json` cria um Ubuntu 24.04 com Java 21 e roda o `scripts/preparar-banco.sh`, que instala e liga o PostgreSQL, cria o usuário `cadencia` com senha sorteada em `~/.cadencia-env` (fora do repositório, mantendo o RNF-07), cria o banco e as tabelas e compila. O `scripts/rodar.sh` liga o banco se precisar e abre o sistema. Com `--zerar`, o banco é recriado antes da apresentação. Os scripts foram testados no ambiente do Claude (Ubuntu 24.04, PostgreSQL 16); o Codespace em si precisa ser testado pelo Caio num ensaio.
+
+**Motivo:** o ambiente é sempre o mesmo, no ensaio e na apresentação. O que se perde: depende de internet na sala e de entrar na conta do GitHub no notebook. Plano B: modo memória com `--exemplo`. Plano C: vídeo do ensaio com o banco.
+
+**Quem decidiu:** Caio.
