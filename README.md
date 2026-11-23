@@ -13,7 +13,7 @@ Projeto Integrador de Sistemas Computacionais · 4º semestre de Análise e Dese
 
 O aluno cadastra **disciplinas** e **flashcards** (frente = pergunta, verso = resposta). O sistema agenda a revisão de cada cartão em intervalos fixos de **1, 3, 7 e 15 dias**: se o aluno acerta, o cartão avança uma etapa; se erra, volta ao começo. Cada resposta fica no histórico.
 
-## Situação atual (16/11/2026)
+## Situação atual (23/11/2026)
 
 | Requisito | Descrição | Situação |
 |---|---|---|
@@ -26,8 +26,9 @@ O aluno cadastra **disciplinas** e **flashcards** (frente = pergunta, verso = re
 | RF-07 | Remoção com confirmação | Feito |
 | — | Persistência no PostgreSQL (DAO + JDBC) | Feito, com modo memória quando o banco não está disponível |
 | — | Testes com JUnit (14 unitários + 6 de integração) | Feito |
+| — | Interface do terminal: uma tela por opção, painel do dia, menu agrupado e cores | Feito (cores desligáveis com `--sem-cor`) |
 
-Os requisitos completos estão em [`docs/DOCUMENTACAO.md`](docs/DOCUMENTACAO.md) e as decisões de projeto em [`docs/DECISOES.md`](docs/DECISOES.md).
+Os requisitos completos estão em [`docs/DOCUMENTACAO.md`](docs/DOCUMENTACAO.md), as decisões de projeto em [`docs/DECISOES.md`](docs/DECISOES.md) e o guia da interface nova em [`docs/GUIA-INTERFACE.md`](docs/GUIA-INTERFACE.md).
 
 ## Como o código está organizado
 
@@ -41,7 +42,10 @@ src/br/com/cadencia/
 │     ├── DisciplinaDao, FlashcardDao, RevisaoDao      interfaces (o que precisa ser guardado)
 │     ├── ...DaoJdbc + ConexaoBanco                    implementação com PostgreSQL (JDBC)
 │     └── ...DaoMemoria                                implementação em memória
-└── view/              tela e teclado: MenuConsole, OpcaoMenuPrincipal
+└── view/              tela e teclado
+      ├── MenuConsole          o que cada tela mostra e pergunta
+      ├── OpcaoMenuPrincipal   as opções do menu (enum), em três grupos
+      └── Tela                 aparência: cores, cabeçalho, tabelas e barras
 test/br/com/cadencia/       testes JUnit (service: unitários; dao: integração)
 lib/postgresql-42.7.4.jar   driver JDBC oficial do PostgreSQL
 lib/junit-platform-console-standalone-1.9.1.jar   JUnit 5 (para rodar os testes)
@@ -63,7 +67,9 @@ O Codespaces é um computador Linux na nuvem que abre no navegador, já com Java
    bash scripts/rodar.sh --exemplo
    ```
 
-   Deve aparecer `[BANCO] Conectado ao PostgreSQL`.
+   Deve aparecer `[BANCO] Conectado ao PostgreSQL` na tela de abertura.
+
+   Dica: maximize o painel do terminal (a setinha no canto do painel), para cada tela caber inteira.
 
 Antes de apresentar, zere o banco para os cartões de exemplo voltarem a vencer hoje:
 
@@ -90,6 +96,8 @@ java -cp bin br.com.cadencia.Main --exemplo
 
 O `--exemplo` carrega 2 disciplinas e 5 flashcards, 3 deles para revisar hoje (um cartão novo só vence amanhã). Sem ele, o sistema começa vazio.
 
+As cores aparecem no Windows Terminal (o padrão do Windows 11), no terminal do VS Code e do IntelliJ, e no Codespaces. No console antigo do Windows, o sistema desliga as cores sozinho. Se mesmo assim aparecerem códigos estranhos, como `←[32m`, acrescente `--sem-cor` no fim do comando.
+
 ### Com PostgreSQL
 
 1. Crie o banco e as tabelas (uma vez só):
@@ -106,7 +114,7 @@ O `--exemplo` carrega 2 disciplinas e 5 flashcards, 3 deles para revisar hoje (u
    java -cp "bin;lib\postgresql-42.7.4.jar" br.com.cadencia.Main --exemplo
    ```
 
-Na abertura o programa mostra `[BANCO] Conectado ao PostgreSQL` ou, se algo faltar, `[AVISO] Sem PostgreSQL: <motivo>` e segue em memória.
+Na tela de abertura o programa mostra `[BANCO] Conectado ao PostgreSQL` ou, se algo faltar, `[AVISO] Sem PostgreSQL: <motivo>` e segue em memória. O motivo vem em português: senha não informada, senha recusada, banco inexistente ou servidor desligado. O status também fica no canto de todas as telas (`■ PostgreSQL` ou `■ memória`).
 
 Outras variáveis (opcionais): `CADENCIA_DB_URL` (padrão `jdbc:postgresql://localhost:5432/cadencia`) e `CADENCIA_DB_USER` (padrão `postgres`). A senha nunca fica escrita no código.
 

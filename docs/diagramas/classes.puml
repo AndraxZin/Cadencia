@@ -17,11 +17,30 @@ class Main {
 
 package "view" {
   class MenuConsole {
-    +iniciar()
+    -usandoBanco : boolean
+    +iniciar(avisosDeAbertura)
+    -exibirMenu(erro)
     -revisarHoje()
     -verHistorico()
+    -abrirTela(titulo)
   }
-  enum OpcaoMenuPrincipal
+  enum OpcaoMenuPrincipal {
+    -codigo : int
+    -grupo : Grupo
+    -rotulo : String
+    -descricao : String
+    {static} +deCodigo(codigo) : Optional
+  }
+  class Tela {
+    -comCores : boolean
+    +limpar()
+    +cabecalho(titulo, status, statusOk)
+    +tabela(titulos, direita, linhas)
+    +ok(mensagem)
+    +erro(mensagem)
+    +aviso(mensagem)
+    +barra(feitos, total, tamanho) : String
+  }
 }
 
 package "service" {
@@ -79,6 +98,7 @@ package "model" {
 Main ..> MenuConsole : cria
 Main ..> ConexaoBanco : usa
 MenuConsole -right..> OpcaoMenuPrincipal
+MenuConsole -left-> Tela
 MenuConsole --> DisciplinaService
 MenuConsole --> FlashcardService
 DisciplinaService --> DisciplinaDao

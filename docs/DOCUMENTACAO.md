@@ -67,7 +67,7 @@ Desenvolver a primeira versão funcional de um sistema de linha de comando em Ja
 | RNF-05 | Execução local | O banco roda na máquina do usuário, sem internet nem APIs externas. |
 | RNF-06 | Disponibilidade sem banco | Se o PostgreSQL não estiver acessível, o sistema avisa e funciona com os dados em memória. |
 | RNF-07 | Segurança da configuração | A senha do banco é informada por variável de ambiente e nunca fica no código-fonte. |
-| RNF-08 | Usabilidade | Menus numerados, mensagens com [OK] e [ERRO], tabelas alinhadas e datas no formato dd/mm/aaaa. |
+| RNF-08 | Usabilidade | Cada opção abre uma tela limpa, com título, e espera o Enter antes de voltar ao menu. O menu mostra o painel do dia e agrupa as opções por assunto. Mensagens com [OK], [ERRO] e [AVISO] e cores com significado (desligáveis com `--sem-cor`), tabelas alinhadas e datas no formato dd/mm/aaaa, também em palavras ("hoje", "amanhã", "em 7 dias"). |
 
 ---
 
@@ -150,13 +150,15 @@ O script `sql/schema.sql` cria as tabelas no PostgreSQL 16 com chave primária, 
 
 O código fica em `src/br/com/cadencia`, separado em camadas. Cada camada tem uma responsabilidade só:
 
-- **view** (`MenuConsole`, `OpcaoMenuPrincipal`): mostra os menus e lê o teclado. Não decide regra nenhuma.
+- **view** (`MenuConsole`, `OpcaoMenuPrincipal`, `Tela`): mostra as telas e lê o teclado. O `MenuConsole` decide o que cada tela mostra; a `Tela` cuida da aparência (cores, cabeçalho, tabelas e barras), como um pequeno design system do terminal. Não decide regra nenhuma.
 - **service** (`DisciplinaService`, `FlashcardService`): as regras de negócio, como "nome não repete" e "acerto sobe uma etapa".
 - **dao** (`DisciplinaDao`, `FlashcardDao`, `RevisaoDao`): guarda e busca os dados. Cada DAO é uma interface com duas implementações: `...DaoJdbc`, que usa o PostgreSQL via JDBC, e `...DaoMemoria`, que usa listas em memória. `ConexaoBanco` abre a conexão.
 - **model** (`Disciplina`, `Flashcard`, `Revisao`): os dados de cada entidade.
 - **Main**: tenta conectar ao PostgreSQL. Se conseguir, entrega aos services os DAOs JDBC; se não, avisa e entrega os DAOs em memória.
 
 Como os services só conhecem as interfaces dos DAOs, as mesmas regras funcionam com o banco e com a memória (polimorfismo).
+
+A separação foi posta à prova em 23/11/2026: a interface do terminal foi redesenhada (telas, painel do dia, cores) mexendo só na camada view. Nenhuma linha das regras, dos DAOs ou do banco mudou, e os 20 testes continuaram passando.
 
 ### 6.2 Diagrama de classes
 
@@ -178,7 +180,16 @@ O programa e o banco rodam no computador do estudante. O programa fala com o Pos
 
 ![Mapa de navegação dos menus](diagramas/mapa-navegacao.png)
 
-Ao abrir, o programa informa se está usando o banco ou a memória e mostra o menu principal. Cada opção pede os dados de que precisa, mostra o resultado e volta ao menu. A opção 0 encerra o programa.
+Ao abrir, o programa mostra a tela de abertura, com o logotipo e o aviso de que está usando o banco ou a memória. Com Enter, aparece o menu principal.
+
+Padrões que valem para todas as telas:
+
+- **Cabeçalho:** toda tela começa com "CADÊNCIA · título" e, à direita, o status do banco (■ PostgreSQL ou ■ memória).
+- **Painel do dia:** o menu abre dizendo o que fazer hoje ("3 flashcards para revisar hoje") ou, se não houver nada, quando é a próxima revisão.
+- **Opções agrupadas:** Estudar (1 e 2), Disciplinas (3 a 5) e Flashcards (6 a 8). A opção mais usada, Revisar hoje, é a 1. O 0 encerra o programa.
+- **Uma tela por vez:** cada opção limpa o terminal, faz o seu trabalho e espera o Enter antes de voltar ao menu, para o resultado não ser empurrado para cima.
+- **Voltar:** nas escolhas de disciplina e de flashcard, 0 (ou Enter vazio) volta direto ao menu.
+- **Cores com significado:** verde para sucesso, vermelho para erro, amarelo para atenção e cinza para dicas. Os prefixos [OK], [ERRO] e [AVISO] continuam, para a mensagem não depender só da cor. Com `--sem-cor`, o sistema funciona sem cores em qualquer terminal. No Windows, as cores só são ligadas nos terminais que as entendem (Windows Terminal, VS Code e IntelliJ); no console antigo, o sistema usa o modo sem cores sozinho.
 
 ---
 
@@ -203,7 +214,7 @@ java -jar lib\junit-platform-console-standalone-1.9.1.jar execute --class-path "
 
 ### 8.3 Casos de teste e resultados
 
-Execução em 16/11/2026, com Java 21 e PostgreSQL 16: **20 testes, 20 aprovados, 0 falhas**. Sem o PostgreSQL disponível, 14 são aprovados e os 6 de integração são pulados.
+Execução em 23/11/2026, com Java 21 e PostgreSQL 16, depois do redesenho da interface: **20 testes, 20 aprovados, 0 falhas**. Sem o PostgreSQL disponível, 14 são aprovados e os 6 de integração são pulados.
 
 | ID | Teste | Tipo | Requisito | Resultado |
 |---|---|---|---|---|
@@ -250,7 +261,8 @@ Liga cada requisito à história de usuário, ao caso de uso, ao código, aos te
 | RF-06 Histórico | US-03 | CU05 | `FlashcardService.listarHistorico`, `RevisaoDao` | T07 a T09, T18 | passo 7 |
 | RF-07 Remoção com confirmação | — | CU06, CU07 | `DisciplinaService.remover`, `FlashcardService.remover`, `ON DELETE CASCADE` | T14, T19 | passo 8 |
 | RNF-03 PostgreSQL via JDBC | — | todos | `dao/...DaoJdbc`, `ConexaoBanco`, `sql/schema.sql` | T15 a T20 | passos 1 e 9 |
-| RNF-04 Robustez | — | todos | `MenuConsole` (`lerInteiro`, `lerSimNao`, tratamento de `AcessoDadosException`) | — (verificado na demonstração) | passo 2 |
+| RNF-04 Robustez | — | todos | `MenuConsole` (`lerInteiro`, `lerCodigo`, `lerSimNao`, tratamento de `AcessoDadosException`) | — (verificado na demonstração) | passos 2 e 8 |
 | RNF-06 Sem banco, em memória | — | todos | `Main`, `...DaoMemoria` | T01 a T14 (usam a memória) | plano B |
+| RNF-08 Usabilidade | — | todos | `MenuConsole` (painel do dia, telas), `Tela` (cores, cabeçalho, tabelas), `OpcaoMenuPrincipal` | — (verificado na demonstração e na validação) | todos |
 
-Passos da demonstração: 1 abrir com o banco; 2 cadastrar disciplina e tentar um nome repetido; 3 cadastrar flashcard; 4 listar; 5 revisar hoje; 6 listar de novo e ver as novas datas; 7 ver o histórico; 8 remover uma disciplina; 9 fechar e abrir de novo para ver os dados no banco.
+Passos da demonstração: 1 abrir com o banco e ver o painel do dia; 2 cadastrar disciplina e tentar um nome repetido; 3 cadastrar um flashcard na disciplina nova; 4 listar disciplinas e flashcards; 5 revisar hoje; 6 listar de novo e ver as novas datas; 7 ver o histórico; 8 remover uma disciplina; 9 fechar e abrir de novo para ver os dados no banco.

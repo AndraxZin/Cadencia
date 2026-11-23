@@ -20,7 +20,8 @@ public class FlashcardService {
 
     // A posição no vetor é a etapa: INTERVALO_EM_DIAS[2] = 7 dias.
     private static final int[] INTERVALO_EM_DIAS = {1, 3, 7, 15};
-    private static final int ULTIMA_ETAPA = INTERVALO_EM_DIAS.length - 1;
+    // Pública para a tela desenhar a barra de etapas sem repetir o número 3.
+    public static final int ULTIMA_ETAPA = INTERVALO_EM_DIAS.length - 1;
 
     private final FlashcardDao flashcardDao;
     private final RevisaoDao revisaoDao;

@@ -211,3 +211,65 @@ Cada decisão relevante do projeto, com o motivo e o que se perde com ela. Serve
 **Motivo:** o ambiente é sempre o mesmo, no ensaio e na apresentação. O que se perde: depende de internet na sala e de entrar na conta do GitHub no notebook. Plano B: modo memória com `--exemplo`. Plano C: vídeo do ensaio com o banco.
 
 **Quem decidiu:** Caio.
+
+---
+
+## [2026-11-23] Interface do terminal redesenhada só na camada view (exceção ao contrato)
+
+**Contexto:** ao rodar com o banco no PC pessoal, a listagem de disciplinas sumia: o menu era impresso logo embaixo e empurrava o resultado para cima. Além disso, o professor avalia a apresentação como a venda de um produto, e as telas eram texto corrido, sem hierarquia, com a opção mais usada (Revisar hoje) escondida no número 5.
+
+**Alternativas:** (a) só colocar uma pausa depois de cada opção; (b) redesenhar todas as telas mexendo só na view; (c) trocar a interface de terminal por outra tecnologia (fora do escopo).
+
+**Escolha:** (b). Cada opção virou uma tela: limpa o terminal, mostra um cabeçalho com o status do banco e espera o Enter para voltar. Também entraram:
+- tela de abertura com logotipo;
+- painel do dia no menu;
+- tabelas com colunas novas: flashcards e "para hoje" por disciplina, a etapa em barra e a próxima revisão em palavras;
+- revisão com um cartão por tela, barra de progresso, a regra explicada a cada resposta e resumo com a % de acerto;
+- histórico com a pergunta, a resposta e o desempenho;
+- cadastro em sequência ("Cadastrar flashcards nela agora?" e "Cadastrar outro?");
+- 0 para voltar nas escolhas;
+- erros de conexão explicados em português.
+
+A aparência ficou numa classe nova, `Tela`.
+
+**Motivo:** resolve o problema visto e deixa o sistema apresentável sem mudar nenhuma regra, o banco ou os testes. Os 20 testes passaram sem nenhuma alteração, o que também prova a separação em camadas. O que se perde: o código da view foi gerado pelo Claude sem a revisão do Caio, por causa do prazo (regra 10). **Antes da apresentação**, ler o `docs/GUIA-INTERFACE.md` e rodar o roteiro da demonstração uma vez.
+
+**Quem decidiu:** Caio (abriu a exceção e escolheu o menu e as cores, nas entradas abaixo).
+
+---
+
+## [2026-11-23] Menu agrupado, com "Revisar hoje" como opção 1
+
+**Contexto:** o menu antigo seguia a ordem do cadastro (1 Cadastrar disciplina ... 5 Revisar hoje), mas o que o aluno faz todo dia é revisar.
+
+**Alternativas:** manter a numeração e mudar só o visual; ou reorganizar por uso e por assunto.
+
+**Escolha:** o menu foi reorganizado em três grupos, mostrados em colunas, mais o 0 Sair:
+- ESTUDAR: 1 Revisar hoje e 2 Ver histórico;
+- DISCIPLINAS: 3 Cadastrar, 4 Listar e 5 Remover;
+- FLASHCARDS: 6 Cadastrar, 7 Listar e 8 Remover.
+
+O enum `OpcaoMenuPrincipal` ganhou o grupo (outro enum, `Grupo`), o rótulo curto e a descrição.
+
+**Motivo:** o que se faz todo dia vem primeiro, e o agrupamento por assunto deixa o menu mais rápido de ler. O que se perde: a numeração antiga. Por isso foram atualizados os casos de uso, o mapa de navegação, o roteiro da demonstração e os slides.
+
+**Quem decidiu:** Caio.
+
+---
+
+## [2026-11-23] Cores com significado, desligáveis com --sem-cor, e UTF-8 no Linux
+
+**Contexto:** cores ajudam a ler rápido, mas dependem de o terminal entender os códigos ANSI. Num teste em Linux sem idioma configurado, os acentos e o logotipo apareceram como "?".
+
+**Alternativas:** só texto; cores sempre; ou cores com uma opção para desligar.
+
+**Escolha:**
+- Cada cor tem um significado fixo: verde para sucesso, vermelho para erro, amarelo para atenção e cinza para dica.
+- Os prefixos [OK], [ERRO] e [AVISO] continuam.
+- Sem terminal (saída redirecionada) ou com `--sem-cor`, o sistema não usa cores nem limpa a tela.
+- No Windows, as cores só ligam nos terminais que com certeza entendem ANSI: Windows Terminal, VS Code e IntelliJ. O `Main` descobre isso pelas variáveis de ambiente que esses terminais criam (`WT_SESSION`, `TERM_PROGRAM` e `TERMINAL_EMULATOR`). No console antigo, o sistema entra sozinho no modo sem cores.
+- No `scripts/rodar.sh` (Linux e Codespaces), o Java roda com `-Dstdout.encoding=UTF-8`.
+
+**Motivo:** o prefixo garante que a mensagem não dependa só da cor, o que também é uma questão de acessibilidade. Com o UTF-8, tela e teclado se entendem em qualquer Linux. O que se perde: num terminal que entende ANSI mas não está na lista, as cores ficam desligadas; e num terminal estranho que diga entender e não entenda, é preciso usar o `--sem-cor`.
+
+**Quem decidiu:** Caio.

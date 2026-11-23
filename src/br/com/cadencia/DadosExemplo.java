@@ -13,7 +13,8 @@ import java.time.LocalDate;
  *
  * Cria 2 disciplinas e 5 flashcards; 3 deles já vencem hoje, para a opção
  * "Revisar hoje" ter o que mostrar (um cartão novo só vence amanhã).
- * Só carrega se ainda não houver nenhuma disciplina.
+ * Só carrega se ainda não houver nenhuma disciplina. Devolve uma frase dizendo
+ * o que aconteceu, que o Main mostra na tela de abertura.
  *
  * Usa os DAOs direto, sem passar pelo service, porque precisa criar cartões
  * já "vencidos", algo que a regra normal de cadastro não permite.
@@ -24,10 +25,9 @@ public final class DadosExemplo {
         // Só tem método estático.
     }
 
-    public static void carregar(DisciplinaDao disciplinaDao, FlashcardDao flashcardDao, RevisaoDao revisaoDao) {
+    public static String carregar(DisciplinaDao disciplinaDao, FlashcardDao flashcardDao, RevisaoDao revisaoDao) {
         if (!disciplinaDao.listar().isEmpty()) {
-            System.out.println("[EXEMPLO] Já existem disciplinas: os dados de exemplo não foram carregados.");
-            return;
+            return "[EXEMPLO] Já existem disciplinas: os dados de exemplo não foram carregados.";
         }
 
         LocalDate hoje = LocalDate.now();
@@ -46,6 +46,6 @@ public final class DadosExemplo {
         flashcardDao.inserir(banco, "O que diz a 3FN?",
                 "Nenhum atributo comum depende de outro atributo comum.", 3, hoje.plusDays(15));
 
-        System.out.println("[EXEMPLO] Carregados 2 disciplinas e 5 flashcards (3 para revisar hoje).");
+        return "[EXEMPLO] Carregados 2 disciplinas e 5 flashcards (3 para revisar hoje).";
     }
 }

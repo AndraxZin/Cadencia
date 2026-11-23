@@ -1,20 +1,29 @@
-%%{init: {"theme":"base","fontFamily":"Liberation Sans, Arial, sans-serif","themeCSS":".labelBkg{background-color:#ffffff !important;} .edgeLabel{background-color:#ffffff !important;}","themeVariables":{"background":"#ffffff","primaryColor":"#ffffff","primaryTextColor":"#000000","primaryBorderColor":"#000000","secondaryColor":"#ffffff","tertiaryColor":"#ffffff","lineColor":"#000000","textColor":"#000000","mainBkg":"#ffffff","nodeBorder":"#000000","edgeLabelBackground":"#ffffff","clusterBkg":"#ffffff","clusterBorder":"#000000","fontFamily":"Liberation Sans, Arial, sans-serif","fontSize":"15px"}}}%%
+%%{init: {"theme":"base","fontFamily":"Liberation Sans, Arial, sans-serif","themeCSS":".labelBkg{background-color:#ffffff !important;} .edgeLabel{background-color:#ffffff !important;} .cluster-label{font-weight:bold;}","themeVariables":{"background":"#ffffff","primaryColor":"#ffffff","primaryTextColor":"#000000","primaryBorderColor":"#000000","secondaryColor":"#ffffff","tertiaryColor":"#ffffff","lineColor":"#000000","textColor":"#000000","mainBkg":"#ffffff","nodeBorder":"#000000","edgeLabelBackground":"#ffffff","clusterBkg":"#ffffff","clusterBorder":"#000000","fontFamily":"Liberation Sans, Arial, sans-serif","fontSize":"15px"}}}%%
 flowchart TD
     INICIO(["Abrir o programa<br/>(java ... Main)"]) --> CONEXAO{"Conectou ao<br/>PostgreSQL?"}
     CONEXAO -- sim --> BANCO["[BANCO] dados no PostgreSQL"]
     CONEXAO -- não --> MEMORIA["[AVISO] dados em memória"]
-    BANCO --> MENU
-    MEMORIA --> MENU
-    MENU["MENU PRINCIPAL"]
-    MENU -- 1 --> O1["Cadastrar disciplina<br/>nome → professor"]
-    MENU -- 2 --> O2["Listar disciplinas"]
-    MENU -- 3 --> O3["Cadastrar flashcard<br/>disciplina → frente → verso"]
-    MENU -- 4 --> O4["Listar flashcards<br/>disciplina → tabela"]
-    MENU -- 5 --> O5["Revisar hoje<br/>frente → Enter → verso → S/N"]
-    MENU -- 6 --> O6["Ver histórico<br/>disciplina → flashcard"]
-    MENU -- 7 --> O7["Remover disciplina<br/>disciplina → S/N"]
-    MENU -- 8 --> O8["Remover flashcard<br/>disciplina → flashcard → S/N"]
+    BANCO --> ABERTURA
+    MEMORIA --> ABERTURA
+    ABERTURA["Tela de abertura<br/>logotipo e status do banco<br/>Enter para começar"] --> MENU
+    MENU["MENU PRINCIPAL<br/>painel do dia + opções em 3 grupos"]
+    subgraph ESTUDAR
+        O1["1 Revisar hoje<br/>pergunta → Enter → resposta<br/>→ S/N → resumo"]
+        O2["2 Ver histórico<br/>disciplina → flashcard"]
+    end
+    subgraph DISCIPLINAS
+        O3["3 Cadastrar<br/>nome → professor<br/>→ flashcards nela? S/N"]
+        O4["4 Listar"]
+        O5["5 Remover<br/>disciplina → S/N"]
+    end
+    subgraph FLASHCARDS
+        O6["6 Cadastrar<br/>disciplina → frente → verso<br/>→ outro? S/N"]
+        O7["7 Listar<br/>disciplina → tabela"]
+        O8["8 Remover<br/>disciplina → flashcard → S/N"]
+    end
+    MENU --> O1 & O2
+    MENU --> O3 & O4 & O5
+    MENU --> O6 & O7 & O8
     MENU -- 0 --> FIM(["Sair"])
-    O1 & O2 & O3 & O4 --> VOLTA["volta ao menu"]
-    O5 & O6 & O7 & O8 --> VOLTA
+    O1 & O2 & O3 & O4 & O5 & O6 & O7 & O8 --> VOLTA["Enter: volta ao menu<br/>(0 numa escolha: volta na hora)"]
     VOLTA --> MENU

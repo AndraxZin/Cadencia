@@ -4,6 +4,7 @@
 # Uso:
 #   bash scripts/rodar.sh             abre o sistema
 #   bash scripts/rodar.sh --exemplo   abre com os dados de exemplo (se o banco estiver vazio)
+#   bash scripts/rodar.sh --sem-cor   abre sem cores (para terminais que mostram códigos estranhos)
 #
 # Antes, uma vez só: bash scripts/preparar-banco.sh
 set -euo pipefail
@@ -17,4 +18,7 @@ cd "$(dirname "$0")/.."
 sudo -n service postgresql start >/dev/null 2>&1 || true
 
 javac -encoding UTF-8 -d bin -sourcepath src src/br/com/cadencia/Main.java
-java -cp "bin:lib/postgresql-42.7.4.jar" br.com.cadencia.Main "$@"
+
+# -Dstdout.encoding=UTF-8: num Linux sem idioma configurado, o Java escreveria os
+# acentos e as letras do logotipo como "?". Com UTF-8, tela e teclado se entendem.
+java -Dstdout.encoding=UTF-8 -cp "bin:lib/postgresql-42.7.4.jar" br.com.cadencia.Main "$@"

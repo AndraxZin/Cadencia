@@ -122,13 +122,14 @@ O Estudante poderá:
 <tr><td>Descrição</td><td>Este caso de uso permite cadastrar uma disciplina, à qual os flashcards serão vinculados.</td></tr>
 <tr><td>Pré-condições</td><td>O sistema deve estar aberto no menu principal.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 1 (Cadastrar disciplina).</li>
-<li>O sistema pede o nome da disciplina.</li>
+<li>O estudante escolhe a opção 3 (Cadastrar, no grupo Disciplinas).</li>
+<li>O sistema abre a tela "Cadastrar disciplina" e pede o nome.</li>
 <li>O estudante informa o nome.</li>
 <li>O sistema pede o professor (opcional).</li>
 <li>O estudante informa o professor ou pressiona Enter para pular.</li>
 <li>O sistema valida os dados e grava a disciplina.</li>
-<li>O sistema exibe "[OK] Disciplina cadastrada com o código N."</li>
+<li>O sistema exibe "[OK] Disciplina cadastrada com o código N." e pergunta "Cadastrar flashcards nela agora? (S/N)".</li>
+<li>O estudante responde N, e o sistema espera o Enter para voltar ao menu principal.</li>
 </ol></td></tr>
 <tr><td>Fluxos Alternativos</td><td>
 <b>FA01 — Nome vazio</b><ol>
@@ -138,10 +139,13 @@ O Estudante poderá:
 <b>FA02 — Nome já cadastrado</b><ol>
 <li>O sistema encontra uma disciplina com o mesmo nome, sem diferenciar maiúsculas de minúsculas.</li>
 <li>O sistema exibe "[ERRO] Já existe uma disciplina chamada (nome)."</li>
-<li>O sistema volta ao menu principal sem gravar.</li></ol>
+<li>O sistema não grava e espera o Enter para voltar ao menu principal.</li></ol>
 <b>FA03 — Texto longo demais</b><ol>
 <li>O nome ou o professor passa de 100 caracteres.</li>
 <li>O sistema exibe "[ERRO] Nome e professor podem ter no máximo 100 caracteres."</li></ol>
+<b>FA04 — Cadastrar flashcards em seguida</b><ol>
+<li>No passo 8, o estudante responde S.</li>
+<li>O sistema abre o cadastro de flashcard já com a disciplina nova escolhida (CU02, a partir do passo 4).</li></ol>
 </td></tr>
 <tr><td>Pós-condições</td><td>Em caso de sucesso:<br>- A disciplina fica gravada e disponível para receber flashcards.<br>Em caso de falha:<br>- Nenhum dado é gravado.</td></tr>
 <tr><td>Regras de Negócio</td><td>RN-01, RN-02</td></tr>
@@ -151,31 +155,38 @@ O Estudante poderá:
 <tr><th>Caso de Uso</th><th>Cadastrar flashcard</th></tr>
 <tr><td>Identificação</td><td>CU02 — Cadastrar flashcard</td></tr>
 <tr><td>Ator(es)</td><td>Estudante</td></tr>
-<tr><td>Descrição</td><td>Este caso de uso permite cadastrar um cartão de estudo (frente e verso) em uma disciplina.</td></tr>
+<tr><td>Descrição</td><td>Este caso de uso permite cadastrar cartões de estudo (frente e verso) em uma disciplina, um após o outro.</td></tr>
 <tr><td>Pré-condições</td><td>Deve existir ao menos uma disciplina cadastrada.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 3 (Cadastrar flashcard).</li>
-<li>O sistema lista as disciplinas e pede o código de uma delas.</li>
+<li>O estudante escolhe a opção 6 (Cadastrar, no grupo Flashcards).</li>
+<li>O sistema lista as disciplinas, com o total de flashcards e quantos vencem hoje, e pede o código de uma delas.</li>
 <li>O estudante informa o código.</li>
 <li>O sistema pede a frente (pergunta).</li>
 <li>O estudante informa a frente.</li>
 <li>O sistema pede o verso (resposta).</li>
 <li>O estudante informa o verso.</li>
 <li>O sistema grava o cartão na etapa 0, com a primeira revisão no dia seguinte.</li>
-<li>O sistema exibe "[OK] Flashcard cadastrado. Primeira revisão em dd/mm/aaaa."</li>
+<li>O sistema exibe "[OK] Flashcard cadastrado. Primeira revisão em dd/mm/aaaa (amanhã)." e pergunta "Cadastrar outro nesta disciplina? (S/N)".</li>
+<li>O estudante responde N, e o sistema espera o Enter para voltar ao menu principal.</li>
 </ol></td></tr>
 <tr><td>Fluxos Alternativos</td><td>
 <b>FA01 — Nenhuma disciplina cadastrada</b><ol>
-<li>O sistema exibe "Cadastre uma disciplina primeiro."</li>
-<li>O sistema volta ao menu principal.</li></ol>
+<li>O sistema exibe "Cadastre uma disciplina primeiro (opção 3)."</li>
+<li>O sistema espera o Enter para voltar ao menu principal.</li></ol>
 <b>FA02 — Código de disciplina inexistente</b><ol>
 <li>O sistema exibe "[ERRO] Disciplina não encontrada."</li>
-<li>O sistema volta ao menu principal.</li></ol>
+<li>O sistema espera o Enter para voltar ao menu principal.</li></ol>
 <b>FA03 — Frente ou verso vazio</b><ol>
 <li>O sistema exibe "[ERRO] Este campo é obrigatório. Tente de novo."</li>
 <li>O sistema pede o campo novamente.</li></ol>
+<b>FA04 — Cadastrar outro</b><ol>
+<li>No passo 10, o estudante responde S.</li>
+<li>O sistema volta ao passo 4, na mesma disciplina.</li></ol>
+<b>FA05 — Desistir da escolha</b><ol>
+<li>Ao ser pedido um código, o estudante digita 0 ou pressiona Enter sem digitar nada.</li>
+<li>O sistema volta direto ao menu principal, sem alterar nada.</li></ol>
 </td></tr>
-<tr><td>Pós-condições</td><td>Em caso de sucesso:<br>- O cartão fica gravado na etapa 0, com revisão marcada para o dia seguinte.<br>Em caso de falha:<br>- Nenhum dado é gravado.</td></tr>
+<tr><td>Pós-condições</td><td>Em caso de sucesso:<br>- Cada cartão fica gravado na etapa 0, com revisão marcada para o dia seguinte.<br>Em caso de falha:<br>- Nenhum dado é gravado.</td></tr>
 <tr><td>Regras de Negócio</td><td>RN-03, RN-04, RN-05</td></tr>
 </table>
 
@@ -186,18 +197,21 @@ O Estudante poderá:
 <tr><td>Descrição</td><td>Este caso de uso permite consultar as disciplinas cadastradas e os flashcards de uma disciplina.</td></tr>
 <tr><td>Pré-condições</td><td>O sistema deve estar aberto no menu principal.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 2 (Listar disciplinas).</li>
-<li>O sistema exibe uma tabela com código, nome e professor de cada disciplina ("-" quando o professor não foi informado).</li>
-<li>Para ver os cartões, o estudante escolhe a opção 4 (Listar flashcards de uma disciplina) e informa o código da disciplina.</li>
-<li>O sistema exibe uma tabela com código, etapa, data da próxima revisão e frente de cada flashcard.</li>
+<li>O estudante escolhe a opção 4 (Listar, no grupo Disciplinas).</li>
+<li>O sistema exibe uma tabela com o código, o nome, o professor ("-" quando não foi informado), o total de flashcards e quantos vencem hoje em cada disciplina.</li>
+<li>Para ver os cartões, o estudante escolhe a opção 7 (Listar, no grupo Flashcards) e informa o código da disciplina.</li>
+<li>O sistema limpa a tela e exibe uma tabela com o código, a etapa (barra e número), a próxima revisão (em palavras e em data, por exemplo "em 3 dias, 26/11/2026") e a frente de cada flashcard.</li>
 </ol></td></tr>
 <tr><td>Fluxos Alternativos</td><td>
 <b>FA01 — Nenhuma disciplina cadastrada</b><ol>
-<li>O sistema exibe "Nenhuma disciplina cadastrada ainda." (opção 2) ou "Cadastre uma disciplina primeiro." (opção 4).</li></ol>
+<li>O sistema exibe "Nenhuma disciplina cadastrada ainda. Use a opção 3 para cadastrar a primeira." (opção 4) ou "Cadastre uma disciplina primeiro (opção 3)." (opção 7).</li></ol>
 <b>FA02 — Disciplina sem flashcards</b><ol>
 <li>O sistema exibe "Esta disciplina ainda não tem flashcards."</li></ol>
 <b>FA03 — Código de disciplina inexistente</b><ol>
 <li>O sistema exibe "[ERRO] Disciplina não encontrada."</li></ol>
+<b>FA04 — Desistir da escolha</b><ol>
+<li>Ao ser pedido um código, o estudante digita 0 ou pressiona Enter sem digitar nada.</li>
+<li>O sistema volta direto ao menu principal, sem alterar nada.</li></ol>
 </td></tr>
 <tr><td>Pós-condições</td><td>Nenhum dado é alterado.</td></tr>
 <tr><td>Regras de Negócio</td><td>RN-03</td></tr>
@@ -207,23 +221,23 @@ O Estudante poderá:
 <tr><th>Caso de Uso</th><th>Revisar flashcards do dia</th></tr>
 <tr><td>Identificação</td><td>CU04 — Revisar flashcards do dia</td></tr>
 <tr><td>Ator(es)</td><td>Estudante<br>Sistema (data do computador)</td></tr>
-<tr><td>Descrição</td><td>Este caso de uso apresenta, um por vez, os cartões que vencem no dia, registra a resposta do estudante e agenda a próxima revisão de cada cartão.</td></tr>
-<tr><td>Pré-condições</td><td>Deve existir ao menos um flashcard com a próxima revisão marcada para hoje ou para um dia anterior.</td></tr>
+<tr><td>Descrição</td><td>Este caso de uso apresenta, um por tela, os cartões que vencem no dia, registra a resposta do estudante, agenda a próxima revisão de cada cartão e mostra o desempenho da sessão.</td></tr>
+<tr><td>Pré-condições</td><td>Deve existir ao menos um flashcard com a próxima revisão marcada para hoje ou para um dia anterior. O painel do menu principal informa quantos são.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 5 (Revisar hoje).</li>
-<li>O sistema busca os cartões com revisão até a data atual, dos mais atrasados para os mais recentes, e informa quantos são.</li>
-<li>O sistema exibe a disciplina e a frente do cartão.</li>
+<li>O estudante escolhe a opção 1 (Revisar hoje).</li>
+<li>O sistema busca os cartões com revisão até a data atual, dos mais atrasados para os mais recentes.</li>
+<li>O sistema abre uma tela para o cartão, com a posição ("Flashcard N de T"), uma barra de progresso, a disciplina, a etapa e a pergunta.</li>
 <li>O estudante tenta lembrar a resposta e pressiona Enter.</li>
-<li>O sistema exibe o verso e pergunta "Você acertou? (S/N)".</li>
+<li>O sistema exibe a resposta e pergunta "Você acertou? (S/N)".</li>
 <li>O estudante responde S ou N.</li>
-<li>O sistema calcula a nova etapa e a próxima revisão, grava o cartão, registra a resposta no histórico e exibe "[OK] Etapa N. Próxima revisão em dd/mm/aaaa."</li>
-<li>Os passos 3 a 7 se repetem para cada cartão.</li>
-<li>O sistema exibe "Revisão concluída: X acerto(s) e Y erro(s)."</li>
+<li>O sistema calcula a nova etapa e a próxima revisão, grava o cartão, registra a resposta no histórico e explica o resultado, por exemplo "Acertou! Sobe da etapa 0 para a 1." e "Próxima revisão: em 3 dias, dd/mm/aaaa."</li>
+<li>O estudante pressiona Enter, e os passos 3 a 7 se repetem para cada cartão.</li>
+<li>O sistema exibe o resumo: "Revisão concluída: X acertos e Y erros.", a porcentagem de acerto e a data da próxima revisão.</li>
 </ol></td></tr>
 <tr><td>Fluxos Alternativos</td><td>
 <b>FA01 — Nenhum cartão para revisar</b><ol>
-<li>O sistema exibe "Nenhum flashcard para revisar hoje."</li>
-<li>O sistema volta ao menu principal.</li></ol>
+<li>O sistema exibe "Nenhum flashcard para revisar hoje." e a data da próxima revisão.</li>
+<li>O sistema espera o Enter para voltar ao menu principal.</li></ol>
 <b>FA02 — Resposta diferente de S ou N</b><ol>
 <li>O sistema exibe "[ERRO] Responda S (sim) ou N (não)."</li>
 <li>O sistema repete a pergunta.</li></ol>
@@ -239,15 +253,16 @@ O Estudante poderá:
 <tr><th>Caso de Uso</th><th>Consultar histórico</th></tr>
 <tr><td>Identificação</td><td>CU05 — Consultar histórico de um flashcard</td></tr>
 <tr><td>Ator(es)</td><td>Estudante</td></tr>
-<tr><td>Descrição</td><td>Este caso de uso permite ver todas as respostas já dadas a um flashcard, para identificar os conteúdos em que o estudante mais erra.</td></tr>
+<tr><td>Descrição</td><td>Este caso de uso permite ver os dados de um flashcard e todas as respostas já dadas a ele, para identificar os conteúdos em que o estudante mais erra.</td></tr>
 <tr><td>Pré-condições</td><td>Deve existir ao menos um flashcard cadastrado.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 6 (Ver histórico de um flashcard).</li>
+<li>O estudante escolhe a opção 2 (Ver histórico).</li>
 <li>O sistema lista as disciplinas e pede o código de uma delas.</li>
 <li>O estudante informa o código da disciplina.</li>
-<li>O sistema lista os flashcards da disciplina e pede o código de um deles.</li>
+<li>O sistema limpa a tela, lista os flashcards da disciplina e pede o código de um deles.</li>
 <li>O estudante informa o código do flashcard.</li>
-<li>O sistema exibe a frente do cartão e uma tabela com a data, a hora e o resultado (Acertou ou Errou) de cada revisão, da mais recente para a mais antiga.</li>
+<li>O sistema exibe a disciplina, a etapa, a próxima revisão, a pergunta e a resposta do cartão.</li>
+<li>O sistema exibe o desempenho (número de revisões, de acertos e a porcentagem de acerto) e uma tabela com a data, a hora e o resultado (Acertou ou Errou) de cada revisão, da mais recente para a mais antiga.</li>
 </ol></td></tr>
 <tr><td>Fluxos Alternativos</td><td>
 <b>FA01 — Cartão nunca revisado</b><ol>
@@ -257,6 +272,9 @@ O Estudante poderá:
 <b>FA03 — Código de flashcard inválido</b><ol>
 <li>O código não pertence à disciplina escolhida.</li>
 <li>O sistema exibe "[ERRO] Flashcard não encontrado nesta disciplina."</li></ol>
+<b>FA04 — Desistir da escolha</b><ol>
+<li>Ao ser pedido um código, o estudante digita 0 ou pressiona Enter sem digitar nada.</li>
+<li>O sistema volta direto ao menu principal, sem alterar nada.</li></ol>
 </td></tr>
 <tr><td>Pós-condições</td><td>Nenhum dado é alterado.</td></tr>
 <tr><td>Regras de Negócio</td><td>RN-09</td></tr>
@@ -269,10 +287,10 @@ O Estudante poderá:
 <tr><td>Descrição</td><td>Este caso de uso permite apagar uma disciplina, junto com os flashcards dela e o histórico desses flashcards.</td></tr>
 <tr><td>Pré-condições</td><td>Deve existir ao menos uma disciplina cadastrada.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 7 (Remover disciplina).</li>
+<li>O estudante escolhe a opção 5 (Remover, no grupo Disciplinas).</li>
 <li>O sistema lista as disciplinas e pede o código de uma delas.</li>
 <li>O estudante informa o código.</li>
-<li>O sistema informa quantos flashcards serão apagados junto com a disciplina e pergunta "Tem certeza? (S/N)".</li>
+<li>O sistema exibe "[AVISO] Isso apaga a disciplina (nome), N flashcards e o histórico deles." e pergunta "Tem certeza? (S/N)".</li>
 <li>O estudante responde S.</li>
 <li>O sistema remove a disciplina, os flashcards dela e o histórico deles.</li>
 <li>O sistema exibe "[OK] Disciplina removida."</li>
@@ -283,6 +301,9 @@ O Estudante poderá:
 <li>O sistema exibe "Remoção cancelada." e nada é apagado.</li></ol>
 <b>FA02 — Código de disciplina inexistente</b><ol>
 <li>O sistema exibe "[ERRO] Disciplina não encontrada."</li></ol>
+<b>FA03 — Desistir da escolha</b><ol>
+<li>Ao ser pedido um código, o estudante digita 0 ou pressiona Enter sem digitar nada.</li>
+<li>O sistema volta direto ao menu principal, sem alterar nada.</li></ol>
 </td></tr>
 <tr><td>Pós-condições</td><td>Em caso de sucesso:<br>- A disciplina, os flashcards dela e o histórico deles deixam de existir.<br>Em caso de cancelamento:<br>- Nenhum dado é alterado.</td></tr>
 <tr><td>Regras de Negócio</td><td>RN-10, RN-11</td></tr>
@@ -295,12 +316,12 @@ O Estudante poderá:
 <tr><td>Descrição</td><td>Este caso de uso permite apagar um flashcard e o histórico dele.</td></tr>
 <tr><td>Pré-condições</td><td>Deve existir ao menos um flashcard cadastrado.</td></tr>
 <tr><td>Fluxo Principal</td><td><ol>
-<li>O estudante escolhe a opção 8 (Remover flashcard).</li>
+<li>O estudante escolhe a opção 8 (Remover, no grupo Flashcards).</li>
 <li>O sistema lista as disciplinas e pede o código de uma delas.</li>
 <li>O estudante informa o código da disciplina.</li>
-<li>O sistema lista os flashcards da disciplina e pede o código de um deles.</li>
+<li>O sistema limpa a tela, lista os flashcards da disciplina e pede o código de um deles.</li>
 <li>O estudante informa o código do flashcard.</li>
-<li>O sistema avisa que o histórico do cartão também será apagado e pergunta "Tem certeza? (S/N)".</li>
+<li>O sistema exibe "[AVISO] Isso apaga o flashcard (frente) e o histórico dele." e pergunta "Tem certeza? (S/N)".</li>
 <li>O estudante responde S.</li>
 <li>O sistema remove o flashcard e o histórico dele e exibe "[OK] Flashcard removido."</li>
 </ol></td></tr>
@@ -310,6 +331,9 @@ O Estudante poderá:
 <li>O sistema exibe "Remoção cancelada." e nada é apagado.</li></ol>
 <b>FA02 — Código de flashcard inválido</b><ol>
 <li>O sistema exibe "[ERRO] Flashcard não encontrado nesta disciplina."</li></ol>
+<b>FA03 — Desistir da escolha</b><ol>
+<li>Ao ser pedido um código, o estudante digita 0 ou pressiona Enter sem digitar nada.</li>
+<li>O sistema volta direto ao menu principal, sem alterar nada.</li></ol>
 </td></tr>
 <tr><td>Pós-condições</td><td>Em caso de sucesso:<br>- O flashcard e o histórico dele deixam de existir.<br>Em caso de cancelamento:<br>- Nenhum dado é alterado.</td></tr>
 <tr><td>Regras de Negócio</td><td>RN-10, RN-11</td></tr>
@@ -354,7 +378,7 @@ O Estudante poderá:
 | RNF-05 | **Execução Local:** o sistema e o banco devem rodar na máquina do usuário, sem internet e sem APIs externas. |
 | RNF-06 | **Disponibilidade sem Banco:** se o PostgreSQL não estiver acessível, o sistema deve avisar o usuário e funcionar com os dados em memória. |
 | RNF-07 | **Segurança da Configuração:** a senha do banco deve ser informada por variável de ambiente e nunca ficar gravada no código-fonte. |
-| RNF-08 | **Usabilidade:** o sistema deve usar menus numerados, mensagens com os prefixos [OK] e [ERRO], tabelas com colunas alinhadas e datas no formato dd/mm/aaaa. |
+| RNF-08 | **Usabilidade:** cada opção deve abrir uma tela limpa, com título e status do banco, e esperar o Enter antes de voltar ao menu. O menu deve mostrar o painel do dia e agrupar as opções por assunto. As mensagens devem usar os prefixos [OK], [ERRO] e [AVISO] e cores com significado, que podem ser desligadas com `--sem-cor`. As tabelas devem ter colunas alinhadas, e as datas, o formato dd/mm/aaaa, também em palavras ("hoje", "amanhã", "em 7 dias"). |
 
 ## 9. Regras de Negócio
 
@@ -374,79 +398,207 @@ O Estudante poderá:
 
 ## 10. Protótipos (Telas do Terminal)
 
-Por ser uma aplicação de terminal, os protótipos são as próprias telas de texto do sistema. As capturas abaixo foram feitas com o sistema em funcionamento, carregado com os dados de exemplo.
+Por ser uma aplicação de terminal, os protótipos são as próprias telas de texto do sistema. As capturas abaixo foram feitas em 23/11/2026, com o sistema conectado ao PostgreSQL e carregado com os dados de exemplo. No terminal, as mensagens aparecem coloridas (verde, vermelho, amarelo e cinza); aqui estão em preto e branco.
 
-**Menu principal**
-
-```
-=== CADÊNCIA - revisão espaçada de flashcards ===
-
------ MENU PRINCIPAL -----
-1 - Cadastrar disciplina
-2 - Listar disciplinas
-3 - Cadastrar flashcard
-4 - Listar flashcards de uma disciplina
-5 - Revisar hoje
-6 - Ver histórico de um flashcard
-7 - Remover disciplina
-8 - Remover flashcard
-0 - Sair
-Escolha uma opção:
-```
-
-**Revisar hoje**
+**Tela de abertura**
 
 ```
---- Revisar hoje ---
-3 flashcard(s) para revisar hoje.
+                           ▄▀▀▀▄
+   ██████╗ █████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗ █████╗
+  ██╔════╝██╔══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║██╔══██╗
+  ██║     ███████║██║  ██║█████╗  ██╔██╗ ██║██║     ██║███████║
+  ██║     ██╔══██║██║  ██║██╔══╝  ██║╚██╗██║██║     ██║██╔══██║
+  ╚██████╗██║  ██║██████╔╝███████╗██║ ╚████║╚██████╗██║██║  ██║
+   ╚═════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝╚═╝  ╚═╝
 
-[1/3] Banco de Dados
-Frente: O que é uma chave primária?
-(Enter para ver a resposta)
-Verso:  A coluna que identifica cada linha da tabela, sem repetir.
-Você acertou? (S/N): S
-[OK] Etapa 1. Próxima revisão em 19/11/2026.
+  Revise o que importa, no dia certo.
+  Flashcards com revisão espaçada: 1, 3, 7 e 15 dias.
+
+  [BANCO] Conectado ao PostgreSQL: os dados ficam gravados.
+  [EXEMPLO] Carregados 2 disciplinas e 5 flashcards (3 para revisar hoje).
+
+  Pressione Enter para começar...
+```
+
+**Menu principal, com o painel do dia**
+
+```
+ CADÊNCIA · segunda-feira, 23/11/2026                        ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  3 flashcards para revisar hoje.  Comece pela opção 1.
+  2 disciplinas · 5 flashcards
+
+  ESTUDAR                 DISCIPLINAS             FLASHCARDS
+  1  Revisar hoje (3)     3  Cadastrar            6  Cadastrar
+  2  Ver histórico        4  Listar               7  Listar
+                          5  Remover              8  Remover
+
+  0  Sair
+
+  Escolha uma opção:
+```
+
+**Revisar hoje: um flashcard**
+
+```
+ CADÊNCIA · Revisar hoje                                     ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  Flashcard 1 de 3   ██████░░░░░░░░░░░░░░
+  Banco de Dados · etapa 0
+
+  PERGUNTA
+  │ O que é uma chave primária?
+
+  Pense na resposta e pressione Enter para conferir...
+
+  RESPOSTA
+  │ A coluna que identifica cada linha da tabela, sem repetir.
+
+  Você acertou? (S/N): s
+
+  Acertou! Sobe da etapa 0 para a 1.
+  Próxima revisão: em 3 dias, 26/11/2026.
+
+  Pressione Enter para o próximo flashcard...
+```
+
+**Revisar hoje: resumo da sessão**
+
+```
+ CADÊNCIA · Revisar hoje                                     ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  Revisão concluída: 2 acertos e 1 erro.
+  █████████████░░░░░░░  67% de acerto
+
+  Próxima revisão: amanhã, 24/11/2026 (3 flashcards).
+
+  Pressione Enter para voltar ao menu...
+```
+
+**Listar flashcards de uma disciplina**
+
+```
+ CADÊNCIA · Listar flashcards de uma disciplina              ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  Banco de Dados
+
+  CÓD.  ETAPA  PRÓXIMA REVISÃO         FRENTE
+  ────  ─────  ──────────────────────  ──────────────────────────────
+     1  █░░ 1  em 3 dias, 26/11/2026   O que é uma chave primária?
+     2  ░░░ 0  amanhã, 24/11/2026      O que é uma chave estrangeira?
+     5  ███ 3  em 15 dias, 08/12/2026  O que diz a 3FN?
+
+  Pressione Enter para voltar ao menu...
 ```
 
 **Histórico de um flashcard**
 
 ```
---- Histórico de um flashcard ---
-Código do flashcard: 2
-Frente: O que é uma chave estrangeira?
-Data e hora       Resultado
-16/11/2026 19:46  Errou
-16/11/2026 19:46  Acertou
+ CADÊNCIA · Ver histórico de um flashcard                    ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  Banco de Dados · etapa ░░░ 0 · próxima revisão: amanhã, 24/11/2026
+
+  PERGUNTA
+  │ O que é uma chave estrangeira?
+
+  RESPOSTA
+  │ A coluna que aponta para a chave primária de outra tabela.
+
+  HISTÓRICO  2 revisões · 1 acerto · 50% de acerto
+  DATA E HORA       RESULTADO
+  ────────────────  ─────────
+  23/11/2026 02:11  Errou
+  23/11/2026 02:11  Acertou
+
+  Pressione Enter para voltar ao menu...
+```
+
+**Cadastrar flashcard**
+
+```
+ CADÊNCIA · Cadastrar flashcard                              ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  Novo flashcard em Engenharia de Software
+  Frente (pergunta): O que é um requisito funcional?
+  Verso (resposta): Uma função que o sistema deve oferecer ao usuário.
+  [OK] Flashcard cadastrado. Primeira revisão em 24/11/2026 (amanhã).
+
+  Cadastrar outro nesta disciplina? (S/N): n
+
+  Pressione Enter para voltar ao menu...
+```
+
+**Remover disciplina (cancelada)**
+
+```
+ CADÊNCIA · Remover disciplina                               ■ PostgreSQL
+ ────────────────────────────────────────────────────────────────────────
+
+  CÓD.  DISCIPLINA                       PROFESSOR  FLASHCARDS  PARA HOJE
+  ────  ───────────────────────────────  ─────────  ──────────  ─────────
+     1  Banco de Dados                   -                   3          0
+     2  Programação Orientada a Objetos  -                   2          0
+     3  Engenharia de Software           -                   1          0
+
+  Código da disciplina (0 para voltar): 1
+
+  [AVISO] Isso apaga a disciplina "Banco de Dados", 3 flashcards e o histórico deles.
+  Tem certeza? (S/N): n
+  Remoção cancelada.
+
+  Pressione Enter para voltar ao menu...
 ```
 
 ## 11. Especificação de Tela
 
-### TL01. Menu Principal
+**Padrões de todas as telas**
+
+| Elemento | Comportamento |
+|---|---|
+| Cabeçalho | Toda tela começa com "CADÊNCIA · (título)" e, à direita, o status do banco: "■ PostgreSQL" (verde) ou "■ memória" (amarelo). Abaixo, uma régua. |
+| Uma tela por vez | Cada opção limpa o terminal antes de começar e termina com "Pressione Enter para voltar ao menu...". |
+| Voltar | Onde o sistema pede um código, 0 ou Enter vazio volta direto ao menu, sem alterar nada. |
+| Mensagens | [OK] em verde, [ERRO] em vermelho e [AVISO] em amarelo; dicas e informações secundárias em cinza. O prefixo continua mesmo sem cor. |
+| Sem cores | Com a opção `--sem-cor`, quando a saída não é um terminal ou no console antigo do Windows (fora do Windows Terminal, do VS Code e do IntelliJ), o sistema não usa cores nem limpa a tela. |
+| Tabelas | Títulos em maiúsculas, uma régua embaixo, textos alinhados à esquerda e números à direita. Textos longos são cortados com "...". |
+
+### TL01. Abertura e Menu Principal
 
 **1. Identificação da Tela**
 
 | Atributo | Detalhamento Técnico |
 |---|---|
-| Nome da Tela | Menu principal |
+| Nome da Tela | Tela de abertura e Menu principal |
 | Código da Tela | TL01 |
 | Casos de Uso | Todos (CU01 a CU07) |
 | Atores | Estudante |
-| Objetivo | Apresentar as opções do sistema e encaminhar o estudante para a funcionalidade escolhida. |
+| Objetivo | Mostrar se os dados estão no banco, dizer o que fazer no dia e encaminhar o estudante para a funcionalidade escolhida. |
 
 **2. Componentes da Interface**
 
 | Elemento | Tipo | Descrição / Texto / Valor |
 |---|---|---|
-| Título | Texto | "=== CADÊNCIA - revisão espaçada de flashcards ===" |
-| Aviso de abertura | Texto dinâmico | "[BANCO] Conectado ao PostgreSQL" ou "[AVISO] Sem PostgreSQL: (motivo)" |
-| Lista de opções | Menu numerado | Opções de 1 a 8 e 0 para sair |
+| Logotipo e frase | Texto | "CADÊNCIA" em letras grandes e a frase "Revise o que importa, no dia certo." |
+| Avisos de abertura | Texto dinâmico | "[BANCO] Conectado ao PostgreSQL: os dados ficam gravados." ou "[AVISO] Sem PostgreSQL: (motivo)"; com `--exemplo`, também "[EXEMPLO] ..." |
+| Início | Tecla Enter | "Pressione Enter para começar..." |
+| Cabeçalho do menu | Texto dinâmico | "CADÊNCIA · (dia da semana, dd/mm/aaaa)" e o status do banco |
+| Painel do dia | Texto dinâmico | "N flashcards para revisar hoje." ou "Tudo em dia: nenhum flashcard para revisar hoje." e a próxima revisão; abaixo, o total de disciplinas e de flashcards |
+| Opções | Menu em três colunas | ESTUDAR: 1 Revisar hoje (com o número de cartões do dia), 2 Ver histórico. DISCIPLINAS: 3 Cadastrar, 4 Listar, 5 Remover. FLASHCARDS: 6 Cadastrar, 7 Listar, 8 Remover. Embaixo, 0 Sair. |
 | Escolha | Campo numérico | "Escolha uma opção:" |
 
 **3. Regras de Negócio**
 
 | Identificador | Regra de Comportamento / Validação |
 |---|---|
-| Opção inválida | Um número fora do menu, ou um texto, exibe "[ERRO] Opção inválida. Digite um dos números do menu." e o menu é exibido de novo. |
+| Opção inválida | Um número fora do menu, ou um texto, mostra o menu de novo com "[ERRO] Opção inválida. Digite um dos números do menu." logo acima da escolha. |
+| Painel vazio | Sem disciplinas, o painel orienta: "Bem-vindo! Comece cadastrando uma disciplina (opção 3)."; com disciplinas e sem flashcards: "Agora cadastre os flashcards da disciplina (opção 6)." |
+| RN-06 (Cartões do dia) | O número ao lado de "Revisar hoje" conta os cartões com revisão até a data atual. |
 
 ### TL02. Cadastro (Disciplina e Flashcard)
 
@@ -458,7 +610,7 @@ Data e hora       Resultado
 | Código da Tela | TL02 |
 | Casos de Uso | CU01 — Cadastrar disciplina, CU02 — Cadastrar flashcard |
 | Atores | Estudante |
-| Objetivo | Receber os dados de uma nova disciplina ou de um novo flashcard. |
+| Objetivo | Receber os dados de uma nova disciplina e dos flashcards dela, em sequência. |
 
 **2. Componentes da Interface**
 
@@ -466,11 +618,13 @@ Data e hora       Resultado
 |---|---|---|
 | Nome da disciplina | Campo de texto (obrigatório) | "Nome da disciplina:" |
 | Professor | Campo de texto (opcional) | "Professor (opcional, Enter para pular):" |
-| Lista de disciplinas | Tabela | Colunas Cód., Disciplina e Professor |
-| Código da disciplina | Campo numérico | "Código da disciplina:" |
+| Seguir para os flashcards | Campo S/N | "Cadastrar flashcards nela agora? (S/N):" |
+| Lista de disciplinas | Tabela | Colunas CÓD., DISCIPLINA, PROFESSOR, FLASHCARDS e PARA HOJE |
+| Código da disciplina | Campo numérico | "Código da disciplina (0 para voltar):" |
 | Frente | Campo de texto (obrigatório) | "Frente (pergunta):" |
 | Verso | Campo de texto (obrigatório) | "Verso (resposta):" |
-| Confirmação | Texto | "[OK] Disciplina cadastrada com o código N." ou "[OK] Flashcard cadastrado. Primeira revisão em dd/mm/aaaa." |
+| Confirmação | Texto | "[OK] Disciplina cadastrada com o código N." ou "[OK] Flashcard cadastrado. Primeira revisão em dd/mm/aaaa (amanhã)." |
+| Cadastrar outro | Campo S/N | "Cadastrar outro nesta disciplina? (S/N):" |
 
 **3. Regras de Negócio**
 
@@ -478,6 +632,7 @@ Data e hora       Resultado
 |---|---|
 | RN-01 (Nome único) | Nome repetido, mesmo com letras maiúsculas diferentes, é recusado. |
 | RN-04 (Campos obrigatórios) | Nome, frente e verso vazios são pedidos novamente. |
+| RN-05 (Cartão novo) | O cartão nasce na etapa 0, com a primeira revisão no dia seguinte. |
 
 ### TL03. Revisar Hoje
 
@@ -489,19 +644,21 @@ Data e hora       Resultado
 | Código da Tela | TL03 |
 | Casos de Uso | CU04 — Revisar flashcards do dia |
 | Atores | Estudante, Sistema (data do computador) |
-| Objetivo | Apresentar os cartões que vencem no dia, um por vez, e registrar cada resposta. |
+| Objetivo | Apresentar os cartões que vencem no dia, um por tela, registrar cada resposta e mostrar o desempenho da sessão. |
 
 **2. Componentes da Interface**
 
 | Elemento | Tipo | Descrição / Texto / Valor |
 |---|---|---|
-| Contador | Texto dinâmico | "N flashcard(s) para revisar hoje." e "[posição/total] Disciplina" |
-| Frente | Texto dinâmico | "Frente: (pergunta)" |
-| Pausa | Tecla Enter | "(Enter para ver a resposta)" |
-| Verso | Texto dinâmico | "Verso: (resposta)" |
-| Resposta | Campo S/N | "Você acertou? (S/N):" |
-| Resultado | Texto dinâmico | "[OK] Etapa N. Próxima revisão em dd/mm/aaaa." |
-| Resumo | Texto dinâmico | "Revisão concluída: X acerto(s) e Y erro(s)." |
+| Progresso | Texto dinâmico e barra | "Flashcard N de T" e uma barra de 20 posições |
+| Contexto | Texto dinâmico | "(disciplina) · etapa N" |
+| Pergunta | Texto dinâmico | "PERGUNTA" e a frente do cartão, com quebra de linha |
+| Pausa | Tecla Enter | "Pense na resposta e pressione Enter para conferir..." |
+| Resposta | Texto dinâmico | "RESPOSTA" e o verso do cartão |
+| Resposta do estudante | Campo S/N | "Você acertou? (S/N):" |
+| Resultado | Texto dinâmico | Em verde: "Acertou! Sobe da etapa X para a Y." (ou "Continua na etapa 3, a última."). Em amarelo: "Errou. Volta da etapa X para a 0." Depois, "Próxima revisão: (em palavras), dd/mm/aaaa." |
+| Próximo | Tecla Enter | "Pressione Enter para o próximo flashcard..." |
+| Resumo | Texto dinâmico e barra | "Revisão concluída: X acertos e Y erros.", barra e "P% de acerto", e "Próxima revisão: ... (N flashcards)." |
 
 **3. Regras de Negócio**
 
@@ -517,19 +674,22 @@ Data e hora       Resultado
 
 | Atributo | Detalhamento Técnico |
 |---|---|
-| Nome da Tela | Histórico de um flashcard |
+| Nome da Tela | Ver histórico de um flashcard |
 | Código da Tela | TL04 |
 | Casos de Uso | CU05 — Consultar histórico |
 | Atores | Estudante |
-| Objetivo | Exibir as respostas já dadas a um cartão. |
+| Objetivo | Exibir os dados de um cartão, o desempenho e as respostas já dadas a ele. |
 
 **2. Componentes da Interface**
 
 | Elemento | Tipo | Descrição / Texto / Valor |
 |---|---|---|
-| Escolha da disciplina | Tabela + campo numérico | "Código da disciplina:" |
-| Escolha do flashcard | Tabela + campo numérico | Colunas Cód., Etapa, Próx. revisão e Frente; "Código do flashcard:" |
-| Histórico | Tabela | Colunas "Data e hora" (dd/mm/aaaa hh:mm) e "Resultado" (Acertou ou Errou) |
+| Escolha da disciplina | Tabela + campo numérico | "Código da disciplina (0 para voltar):" |
+| Escolha do flashcard | Tabela + campo numérico | Colunas CÓD., ETAPA, PRÓXIMA REVISÃO e FRENTE; "Código do flashcard (0 para voltar):" |
+| Dados do cartão | Texto dinâmico | Disciplina, etapa (barra e número) e próxima revisão |
+| Pergunta e resposta | Texto dinâmico | "PERGUNTA" e "RESPOSTA", com a frente e o verso |
+| Desempenho | Texto dinâmico | "HISTÓRICO  N revisões · N acertos · P% de acerto" |
+| Histórico | Tabela | Colunas "DATA E HORA" (dd/mm/aaaa hh:mm) e "RESULTADO" (Acertou em verde ou Errou em amarelo) |
 
 **3. Regras de Negócio**
 
@@ -554,7 +714,7 @@ Data e hora       Resultado
 
 | Elemento | Tipo | Descrição / Texto / Valor |
 |---|---|---|
-| Aviso | Texto dinâmico | "Isso apaga a disciplina (nome), N flashcard(s) e o histórico deles." ou "Isso apaga o flashcard (frente) e o histórico dele." |
+| Aviso | Texto dinâmico (amarelo) | "[AVISO] Isso apaga a disciplina (nome), N flashcards e o histórico deles." ou "[AVISO] Isso apaga o flashcard (frente) e o histórico dele." |
 | Confirmação | Campo S/N | "Tem certeza? (S/N):" |
 | Resultado | Texto | "[OK] Disciplina removida.", "[OK] Flashcard removido." ou "Remoção cancelada." |
 
@@ -573,6 +733,7 @@ Data e hora       Resultado
 - O uso é individual: não há login, nem compartilhamento de cartões entre estudantes.
 - O sistema não avisa o estudante fora do programa; é preciso abri-lo para revisar.
 - No modo memória, usado quando o banco não está disponível, os dados se perdem ao fechar o programa.
+- As cores e a limpeza da tela dependem de um terminal que entenda códigos ANSI (Windows Terminal, PowerShell, GitHub Codespaces). Em terminais antigos, usa-se a opção `--sem-cor`.
 - Ao registrar uma resposta, a atualização do cartão e a gravação no histórico são dois comandos separados, ainda sem transação.
 
 **Melhorias futuras**

@@ -13,7 +13,7 @@ participant ":FlashcardDaoJdbc" as FD
 participant ":RevisaoDaoJdbc" as RD
 database "PostgreSQL" as DB
 
-Estudante -> V : opção 5 (Revisar hoje)
+Estudante -> V : opção 1 (Revisar hoje)
 V -> S : listarParaRevisarHoje()
 S -> FD : listarParaRevisar(hoje)
 FD -> DB : SELECT ... WHERE proxima_revisao <= ?
@@ -21,9 +21,9 @@ DB --> FD : linhas
 FD --> S : lista de Flashcard
 S --> V : cartões vencidos
 loop para cada cartão
-  V -> Estudante : mostra a frente
+  V -> Estudante : nova tela: Flashcard N de T e a pergunta
   Estudante -> V : Enter
-  V -> Estudante : mostra o verso e pergunta S/N
+  V -> Estudante : mostra a resposta e pergunta S/N
   Estudante -> V : S ou N
   V -> S : registrarResposta(flashcard, acertou)
   S -> S : proximaEtapa() e intervaloEmDias()
@@ -32,7 +32,8 @@ loop para cada cartão
   S -> RD : inserir(codigo, acertou)
   RD -> DB : INSERT INTO revisao
   S --> V : data da próxima revisão
-  V -> Estudante : [OK] Etapa N. Próxima revisão em ...
+  V -> Estudante : explica o resultado (ex.: Acertou! Sobe da etapa 0 para a 1)\ne a próxima revisão
+  Estudante -> V : Enter (próximo flashcard)
 end
-V -> Estudante : Revisão concluída: X acerto(s) e Y erro(s)
+V -> Estudante : Revisão concluída: X acertos e Y erros,\n% de acerto e a próxima revisão
 @enduml
